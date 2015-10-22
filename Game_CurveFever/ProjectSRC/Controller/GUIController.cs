@@ -31,7 +31,7 @@ namespace Game_CurveFever.ProjectSRC.Controller {
             if(Model == null) Model = new GUIModel();
 
             View = view;
-            View.UpdateView(Model);
+            //View.UpdateView(Model);
         }
     }
 }

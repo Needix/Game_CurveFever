@@ -25,13 +25,16 @@
         private void InitializeComponent() {
             this.splitContainer_local_keys_options = new System.Windows.Forms.SplitContainer();
             this.groupBox_keys = new System.Windows.Forms.GroupBox();
-            this.tb_player_stearRight = new System.Windows.Forms.TextBox();
-            this.tb_player_stearLeft = new System.Windows.Forms.TextBox();
+            this.cbox_player_stearRight = new System.Windows.Forms.CheckBox();
+            this.cbox_player_stearLeft = new System.Windows.Forms.CheckBox();
             this.tb_player_name = new System.Windows.Forms.TextBox();
             this.b_removeSelectedPlayer = new System.Windows.Forms.Button();
             this.b_addPlayer = new System.Windows.Forms.Button();
             this.listBox_player = new System.Windows.Forms.ListBox();
             this.groupBox_options = new System.Windows.Forms.GroupBox();
+            this.b_startLocalGame = new System.Windows.Forms.Button();
+            this.label6 = new System.Windows.Forms.Label();
+            this.comboBox_options_playerStart = new System.Windows.Forms.ComboBox();
             this.label5 = new System.Windows.Forms.Label();
             this.comboBox_options_createWinPhoto = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
@@ -42,8 +45,6 @@
             this.comboBox_options_playerSpeed = new System.Windows.Forms.ComboBox();
             this.comboBox_options_items = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_local_keys_options)).BeginInit();
             this.splitContainer_local_keys_options.Panel1.SuspendLayout();
             this.splitContainer_local_keys_options.Panel2.SuspendLayout();
@@ -66,14 +67,14 @@
             // splitContainer_local_keys_options.Panel2
             // 
             this.splitContainer_local_keys_options.Panel2.Controls.Add(this.groupBox_options);
-            this.splitContainer_local_keys_options.Size = new System.Drawing.Size(669, 374);
+            this.splitContainer_local_keys_options.Size = new System.Drawing.Size(669, 229);
             this.splitContainer_local_keys_options.SplitterDistance = 311;
             this.splitContainer_local_keys_options.TabIndex = 0;
             // 
             // groupBox_keys
             // 
-            this.groupBox_keys.Controls.Add(this.tb_player_stearRight);
-            this.groupBox_keys.Controls.Add(this.tb_player_stearLeft);
+            this.groupBox_keys.Controls.Add(this.cbox_player_stearRight);
+            this.groupBox_keys.Controls.Add(this.cbox_player_stearLeft);
             this.groupBox_keys.Controls.Add(this.tb_player_name);
             this.groupBox_keys.Controls.Add(this.b_removeSelectedPlayer);
             this.groupBox_keys.Controls.Add(this.b_addPlayer);
@@ -81,28 +82,32 @@
             this.groupBox_keys.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox_keys.Location = new System.Drawing.Point(0, 0);
             this.groupBox_keys.Name = "groupBox_keys";
-            this.groupBox_keys.Size = new System.Drawing.Size(311, 374);
+            this.groupBox_keys.Size = new System.Drawing.Size(311, 229);
             this.groupBox_keys.TabIndex = 0;
             this.groupBox_keys.TabStop = false;
             this.groupBox_keys.Text = "Player";
             // 
-            // tb_player_stearRight
+            // cbox_player_stearRight
             // 
-            this.tb_player_stearRight.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tb_player_stearRight.Location = new System.Drawing.Point(155, 45);
-            this.tb_player_stearRight.Name = "tb_player_stearRight";
-            this.tb_player_stearRight.Size = new System.Drawing.Size(150, 20);
-            this.tb_player_stearRight.TabIndex = 5;
-            this.tb_player_stearRight.Text = "Stear Right";
+            this.cbox_player_stearRight.Appearance = System.Windows.Forms.Appearance.Button;
+            this.cbox_player_stearRight.Location = new System.Drawing.Point(156, 45);
+            this.cbox_player_stearRight.Name = "cbox_player_stearRight";
+            this.cbox_player_stearRight.Size = new System.Drawing.Size(149, 24);
+            this.cbox_player_stearRight.TabIndex = 5;
+            this.cbox_player_stearRight.Text = "Stear Right";
+            this.cbox_player_stearRight.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.cbox_player_stearRight.UseVisualStyleBackColor = true;
             // 
-            // tb_player_stearLeft
+            // cbox_player_stearLeft
             // 
-            this.tb_player_stearLeft.Location = new System.Drawing.Point(12, 45);
-            this.tb_player_stearLeft.Name = "tb_player_stearLeft";
-            this.tb_player_stearLeft.Size = new System.Drawing.Size(137, 20);
-            this.tb_player_stearLeft.TabIndex = 4;
-            this.tb_player_stearLeft.Text = "Stear Left";
+            this.cbox_player_stearLeft.Appearance = System.Windows.Forms.Appearance.Button;
+            this.cbox_player_stearLeft.Location = new System.Drawing.Point(12, 45);
+            this.cbox_player_stearLeft.Name = "cbox_player_stearLeft";
+            this.cbox_player_stearLeft.Size = new System.Drawing.Size(138, 24);
+            this.cbox_player_stearLeft.TabIndex = 4;
+            this.cbox_player_stearLeft.Text = "Stear Left";
+            this.cbox_player_stearLeft.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.cbox_player_stearLeft.UseVisualStyleBackColor = true;
             // 
             // tb_player_name
             // 
@@ -142,13 +147,14 @@
             this.listBox_player.FormattingEnabled = true;
             this.listBox_player.Location = new System.Drawing.Point(12, 104);
             this.listBox_player.Name = "listBox_player";
-            this.listBox_player.Size = new System.Drawing.Size(293, 264);
+            this.listBox_player.Size = new System.Drawing.Size(293, 108);
             this.listBox_player.TabIndex = 0;
             // 
             // groupBox_options
             // 
+            this.groupBox_options.Controls.Add(this.b_startLocalGame);
             this.groupBox_options.Controls.Add(this.label6);
-            this.groupBox_options.Controls.Add(this.comboBox1);
+            this.groupBox_options.Controls.Add(this.comboBox_options_playerStart);
             this.groupBox_options.Controls.Add(this.label5);
             this.groupBox_options.Controls.Add(this.comboBox_options_createWinPhoto);
             this.groupBox_options.Controls.Add(this.label4);
@@ -162,19 +168,52 @@
             this.groupBox_options.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox_options.Location = new System.Drawing.Point(0, 0);
             this.groupBox_options.Name = "groupBox_options";
-            this.groupBox_options.Size = new System.Drawing.Size(354, 374);
+            this.groupBox_options.Size = new System.Drawing.Size(354, 229);
             this.groupBox_options.TabIndex = 0;
             this.groupBox_options.TabStop = false;
             this.groupBox_options.Text = "Options";
+            // 
+            // b_startLocalGame
+            // 
+            this.b_startLocalGame.Enabled = false;
+            this.b_startLocalGame.Location = new System.Drawing.Point(9, 176);
+            this.b_startLocalGame.Name = "b_startLocalGame";
+            this.b_startLocalGame.Size = new System.Drawing.Size(339, 36);
+            this.b_startLocalGame.TabIndex = 12;
+            this.b_startLocalGame.Text = "Start local game";
+            this.b_startLocalGame.UseVisualStyleBackColor = true;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(7, 152);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(109, 13);
+            this.label6.TabIndex = 11;
+            this.label6.Text = "Player start positions: ";
+            // 
+            // comboBox_options_playerStart
+            // 
+            this.comboBox_options_playerStart.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox_options_playerStart.FormattingEnabled = true;
+            this.comboBox_options_playerStart.Items.AddRange(new object[] {
+            "Random",
+            "Circle",
+            "Line"});
+            this.comboBox_options_playerStart.Location = new System.Drawing.Point(132, 149);
+            this.comboBox_options_playerStart.Name = "comboBox_options_playerStart";
+            this.comboBox_options_playerStart.Size = new System.Drawing.Size(216, 21);
+            this.comboBox_options_playerStart.TabIndex = 10;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(7, 125);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(119, 13);
+            this.label5.Size = new System.Drawing.Size(74, 13);
             this.label5.TabIndex = 9;
-            this.label5.Text = "Create winning photo?: ";
+            this.label5.Text = "Photo finish?: ";
             // 
             // comboBox_options_createWinPhoto
             // 
@@ -194,9 +233,9 @@
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(7, 98);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(88, 13);
+            this.label4.Size = new System.Drawing.Size(94, 13);
             this.label4.TabIndex = 7;
-            this.label4.Text = "Pause allowed?: ";
+            this.label4.Text = "Paused allowed?: ";
             // 
             // comboBox_options_pauseAllowed
             // 
@@ -271,35 +310,13 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Items: ";
             // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(7, 152);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(109, 13);
-            this.label6.TabIndex = 11;
-            this.label6.Text = "Player start positions: ";
-            // 
-            // comboBox1
-            // 
-            this.comboBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "Random",
-            "Circle",
-            "Line"});
-            this.comboBox1.Location = new System.Drawing.Point(132, 149);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(216, 21);
-            this.comboBox1.TabIndex = 10;
-            // 
             // GUILocalNew
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(669, 374);
+            this.ClientSize = new System.Drawing.Size(669, 229);
             this.Controls.Add(this.splitContainer_local_keys_options);
+            this.KeyPreview = true;
             this.Name = "GUILocalNew";
             this.Text = "GUILocal";
             this.splitContainer_local_keys_options.Panel1.ResumeLayout(false);
@@ -322,8 +339,6 @@
         private System.Windows.Forms.Button b_removeSelectedPlayer;
         private System.Windows.Forms.Button b_addPlayer;
         private System.Windows.Forms.ListBox listBox_player;
-        private System.Windows.Forms.TextBox tb_player_stearRight;
-        private System.Windows.Forms.TextBox tb_player_stearLeft;
         private System.Windows.Forms.GroupBox groupBox_options;
         private System.Windows.Forms.ComboBox comboBox_options_items;
         private System.Windows.Forms.Label label1;
@@ -336,6 +351,9 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox comboBox_options_createWinPhoto;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox comboBox_options_playerStart;
+        private System.Windows.Forms.Button b_startLocalGame;
+        private System.Windows.Forms.CheckBox cbox_player_stearLeft;
+        private System.Windows.Forms.CheckBox cbox_player_stearRight;
     }
 }

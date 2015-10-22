@@ -12,21 +12,29 @@ using Game_CurveFever.ProjectSRC.Model;
 
 namespace Game_CurveFever.ProjectSRC.GUI {
     public partial class GUIMain :Form {
-        private GUIController _controller;
 
         public GUIMain() {
             InitializeComponent();
-            RegisterCustomEvents();
         }
 
-        private void RegisterCustomEvents() {
-            //TODO: Add custom events here
+        private void b_local_createNewGame_Click(object sender, System.EventArgs e) {
+            this.Visible = false;
+            new GUILocalNew().Visible = true;
         }
 
-        public void RegisterController(GUIController controller) { _controller = controller; }
+        private void b_local_loadSavedGame_Click(object sender, System.EventArgs e) {
+            this.Visible = false;
+            new GUILocalLoad().Visible = true;
+        }
 
-        public void UpdateView(GUIModel model) {
-            //TODO: Add update code here (update gui components from model data)
+        private void b_internet_createNewServer_Click(object sender, System.EventArgs e) {
+            this.Visible = false;
+            new GUIInternetCreate().Visible = true;
+        }
+
+        private void b_internet_joinServer_Click(object sender, System.EventArgs e) {
+            this.Visible = false;
+            new GUIInternetJoin().Visible = true;
         }
     }
 }

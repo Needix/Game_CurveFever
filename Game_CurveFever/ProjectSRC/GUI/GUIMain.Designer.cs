@@ -25,11 +25,11 @@
         private void InitializeComponent() {
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
             this.groupBox_main_local = new System.Windows.Forms.GroupBox();
-            this.b_local_createNewGame = new System.Windows.Forms.Button();
             this.b_local_loadSavedGame = new System.Windows.Forms.Button();
+            this.b_local_createNewGame = new System.Windows.Forms.Button();
             this.groupBox_internet = new System.Windows.Forms.GroupBox();
-            this.b_internet_createNewServer = new System.Windows.Forms.Button();
             this.b_internet_joinServer = new System.Windows.Forms.Button();
+            this.b_internet_createNewServer = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
@@ -69,17 +69,6 @@
             this.groupBox_main_local.TabStop = false;
             this.groupBox_main_local.Text = "Local";
             // 
-            // b_local_createNewGame
-            // 
-            this.b_local_createNewGame.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.b_local_createNewGame.Location = new System.Drawing.Point(12, 19);
-            this.b_local_createNewGame.Name = "b_local_createNewGame";
-            this.b_local_createNewGame.Size = new System.Drawing.Size(324, 23);
-            this.b_local_createNewGame.TabIndex = 0;
-            this.b_local_createNewGame.Text = "Create new game...";
-            this.b_local_createNewGame.UseVisualStyleBackColor = true;
-            // 
             // b_local_loadSavedGame
             // 
             this.b_local_loadSavedGame.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -90,6 +79,19 @@
             this.b_local_loadSavedGame.TabIndex = 1;
             this.b_local_loadSavedGame.Text = "Load saved game...";
             this.b_local_loadSavedGame.UseVisualStyleBackColor = true;
+            this.b_local_loadSavedGame.Click += new System.EventHandler(this.b_local_loadSavedGame_Click);
+            // 
+            // b_local_createNewGame
+            // 
+            this.b_local_createNewGame.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.b_local_createNewGame.Location = new System.Drawing.Point(12, 19);
+            this.b_local_createNewGame.Name = "b_local_createNewGame";
+            this.b_local_createNewGame.Size = new System.Drawing.Size(324, 23);
+            this.b_local_createNewGame.TabIndex = 0;
+            this.b_local_createNewGame.Text = "Create new game...";
+            this.b_local_createNewGame.UseVisualStyleBackColor = true;
+            this.b_local_createNewGame.Click += new System.EventHandler(this.b_local_createNewGame_Click);
             // 
             // groupBox_internet
             // 
@@ -103,17 +105,6 @@
             this.groupBox_internet.TabStop = false;
             this.groupBox_internet.Text = "Internet";
             // 
-            // b_internet_createNewServer
-            // 
-            this.b_internet_createNewServer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.b_internet_createNewServer.Location = new System.Drawing.Point(12, 19);
-            this.b_internet_createNewServer.Name = "b_internet_createNewServer";
-            this.b_internet_createNewServer.Size = new System.Drawing.Size(324, 23);
-            this.b_internet_createNewServer.TabIndex = 0;
-            this.b_internet_createNewServer.Text = "Create new server...";
-            this.b_internet_createNewServer.UseVisualStyleBackColor = true;
-            // 
             // b_internet_joinServer
             // 
             this.b_internet_joinServer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -124,6 +115,19 @@
             this.b_internet_joinServer.TabIndex = 1;
             this.b_internet_joinServer.Text = "Join Server";
             this.b_internet_joinServer.UseVisualStyleBackColor = true;
+            this.b_internet_joinServer.Click += new System.EventHandler(this.b_internet_joinServer_Click);
+            // 
+            // b_internet_createNewServer
+            // 
+            this.b_internet_createNewServer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.b_internet_createNewServer.Location = new System.Drawing.Point(12, 19);
+            this.b_internet_createNewServer.Name = "b_internet_createNewServer";
+            this.b_internet_createNewServer.Size = new System.Drawing.Size(324, 23);
+            this.b_internet_createNewServer.TabIndex = 0;
+            this.b_internet_createNewServer.Text = "Create new server...";
+            this.b_internet_createNewServer.UseVisualStyleBackColor = true;
+            this.b_internet_createNewServer.Click += new System.EventHandler(this.b_internet_createNewServer_Click);
             // 
             // GUIMain
             // 
