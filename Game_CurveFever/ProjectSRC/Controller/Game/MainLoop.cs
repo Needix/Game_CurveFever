@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
+using Game_CurveFever.ProjectSRC.Controller.GUI;
 using Game_CurveFever.ProjectSRC.Model.Game;
 using Game_CurveFever.ProjectSRC.Model.Game.Items;
 
@@ -29,6 +30,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
             Running = 0,
             Paused = 1,
             Won = 2,
+            End = 3,
         }
 
         private readonly MainPanel _panel; 
@@ -39,18 +41,18 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         public List<Item> FieldItems { get; private set; }
 
         public GameStates GameState { get; set; }
-        public bool End { get; set; }
-        public bool Paused { get; set; }
 
-        private int _lastItemAppearedTick = Environment.TickCount;
+        private int _lastItemSpawnTick = Environment.TickCount;
         private readonly int _tickTimeBetweenNewItemSpawns = 7*1000;
-        private readonly double _itemAppearProbability = 0.005;
+        private readonly double _itemSpawnProbability = 0.005;
 
         public Player Winner { get; private set; }
 
+        public static int LastRunSpeed { get; private set; }
+
         private readonly KeyMessageFilter _keyMessageFilter = new KeyMessageFilter();
 
-        public MainLoop(GameOptions gameOptions, List<Player> players) {
+        public MainLoop(int guiW, int guiH, GameOptions gameOptions, List<Player> players) {
             _gameOptions = gameOptions;
             Players = players;
             FieldItems = new List<Item>();
@@ -60,7 +62,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
 
             Application.AddMessageFilter(_keyMessageFilter);
 
-            _panel = new MainPanel(this);
+            _panel = new MainPanel(guiW, guiH, this);
             _panel.Visible = true;
 
             var mainLoopThread = new Thread(Run);
@@ -69,12 +71,25 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         }
 
         private void Run() {
-            while(!End) {
-                if(_gameOptions.PlayerSpeed < 100) Thread.Sleep(100 - (_gameOptions.PlayerSpeed)); //TEST: Max speed / Min speed
+            while(GameState!=GameStates.End) {
+                int sleep = _gameOptions.PlayerSpeed + LastRunSpeed;
+                Debug.WriteLine("Sleep: "+sleep);
+                if (sleep < 100) Thread.Sleep(100 - sleep); //TEST: Max speed / Min speed
+
                 if(_panel == null) continue;
+
+                int lastTick = Environment.TickCount;
                 CalcNextRound();
+                Debug.WriteLine("CalcMilliseconds: "+(Environment.TickCount-lastTick));
+                LastRunSpeed = (Environment.TickCount - lastTick);
+
+                lastTick = Environment.TickCount;
                 _panel.Repaint();
+                Debug.WriteLine("DrawMilliseconds: " + (Environment.TickCount - lastTick));
+                LastRunSpeed += (Environment.TickCount - lastTick);
+                Debug.WriteLine("");
             }
+            //TODO: Send network message on exit (or just use timeouts)
             Application.Exit();
         }
 
@@ -110,11 +125,11 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         }
 
         private void CreateNewFieldItems() {
-            if (Environment.TickCount - _lastItemAppearedTick > _tickTimeBetweenNewItemSpawns &&
-                Random.NextDouble() < _itemAppearProbability) {
+            if (Environment.TickCount - _lastItemSpawnTick > _tickTimeBetweenNewItemSpawns &&
+                Random.NextDouble() < _itemSpawnProbability) {
                 Item newItem = Item.CreateRandomItem();
                 FieldItems.Add(newItem);
-                _lastItemAppearedTick = Environment.TickCount;
+                _lastItemSpawnTick = Environment.TickCount;
                 Debug.WriteLine("Created new item: "+newItem);
             }
         }
@@ -184,7 +199,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         }
 
         private bool CheckPlayerHitWall(Player player, HitPoint nextMove) {
-            if(nextMove.HitWall(MainPanel.GAME_SCOREBOARD_X, MainPanel.GAME_HEIGHT)) {
+            if(nextMove.HitWall(MainPanel.GameScoreboardX, MainPanel.GameHeight)) {
                 player.PlayerState.Died = true;
                 Debug.WriteLine(player.Name +" died! (WallHit @ "+nextMove+")");
                 return true;
@@ -193,7 +208,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         }
 
         public void Exit() {
-            End = true;
+            GameState = GameStates.End;
         }
     }
 }

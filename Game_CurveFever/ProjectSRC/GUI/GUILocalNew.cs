@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Game_CurveFever.ProjectSRC.Controller.Game;
+using Game_CurveFever.ProjectSRC.Controller.GUI;
 using Game_CurveFever.ProjectSRC.Model.Game;
 
 namespace Game_CurveFever.ProjectSRC.GUI {
@@ -102,17 +103,23 @@ namespace Game_CurveFever.ProjectSRC.GUI {
             else if(playerStart.Equals("Circle")) startPos = GameOptions.PlayerStartPositions.Circle;
             else startPos = GameOptions.PlayerStartPositions.Random;
 
+            int guiW = 1500;
+            int guiH = 900;
+            Rectangle screenSize = Screen.FromControl(this).Bounds;
+            if (screenSize.Width < guiW) guiW = screenSize.Width;
+            if (screenSize.Height < guiH) guiH = screenSize.Height;
+
             FinalizePlayer(startPos);
 
             GameOptions options = new GameOptions(items, playerSpeed, GameOptions.Host.Server, neededWins, pause, startPos, photoFinish, null);
-            MainLoop main = new MainLoop(options, _players);
+            MainLoop main = new MainLoop(guiW, guiH, options, _players);
             this.Visible = false;
             
         }
 
         private void FinalizePlayer(GameOptions.PlayerStartPositions start) {
-            int guiWidth = MainPanel.GAME_WIDTH;
-            int guiHeight = MainPanel.GAME_HEIGHT;
+            int guiWidth = MainPanel.GameWidth;
+            int guiHeight = MainPanel.GameHeight;
 
             for(int i = 0; i < _players.Count; i++) {
                 Player curPlayer = _players[i];

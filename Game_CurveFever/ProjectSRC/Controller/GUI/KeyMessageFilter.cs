@@ -8,10 +8,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Windows.Forms;
 
-namespace Game_CurveFever.ProjectSRC.Controller.Game {
+namespace Game_CurveFever.ProjectSRC.Controller.GUI {
     public class KeyMessageFilter :IMessageFilter { //http://stackoverflow.com/questions/1100285/how-to-detect-the-currently-pressed-key
         private readonly KeysConverter _converted = new KeysConverter();
 

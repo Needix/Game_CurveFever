@@ -10,12 +10,13 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using Game_CurveFever.ProjectSRC.Controller.Game;
+using Game_CurveFever.ProjectSRC.Controller.GUI;
 using Game_CurveFever.Properties;
 
 namespace Game_CurveFever.ProjectSRC.Model.Game.Items {
     public class Item {
-        public const int MAX_TICK_AMOUNT_ITEM_ON_FIELD = 20000;
-        public const int IMAGE_HITBOX_SIZE = 10;
+        public const int MAX_TICK_TIME_ON_FIELD = 20 * 1000;
+        public const int IMAGE_HITBOX_SIZE = 25;
 
         public static List<Item> PossibleItems { get; private set; }
         public static void CreateItems() {
@@ -41,8 +42,8 @@ namespace Game_CurveFever.ProjectSRC.Model.Game.Items {
         public int Y { get; private set; }
         public bool ShowCaseItem { get; private set; }
 
-        public int AppearedTick { get; private set; }
-        public int RemoveTick { get; private set; }
+        public int SpawnTick { get; private set; }
+        public int DespawnTick { get; private set; }
         public bool Collected { get; set; }
 
         public Effect Effect { get; private set; }
@@ -53,8 +54,8 @@ namespace Game_CurveFever.ProjectSRC.Model.Game.Items {
             Y = y;
             Image = image;
             Effect = effect;
-            AppearedTick = Environment.TickCount;
-            RemoveTick = Environment.TickCount + MAX_TICK_AMOUNT_ITEM_ON_FIELD;
+            SpawnTick = Environment.TickCount;
+            DespawnTick = Environment.TickCount + MAX_TICK_TIME_ON_FIELD;
             ShowCaseItem = false;
         }
 
@@ -67,11 +68,11 @@ namespace Game_CurveFever.ProjectSRC.Model.Game.Items {
 
         public static Item CreateRandomItem() {
             Item selectedItem = PossibleItems[MainLoop.Random.Next(PossibleItems.Count)];
-            return new Item(selectedItem.Image, MainLoop.Random.Next(MainPanel.GAME_SCOREBOARD_X), MainLoop.Random.Next(MainPanel.GAME_HEIGHT), selectedItem.Effect.Copy());
+            return new Item(selectedItem.Image, MainLoop.Random.Next(MainPanel.GameScoreboardX - IMAGE_HITBOX_SIZE), MainLoop.Random.Next(MainPanel.GameHeight), selectedItem.Effect.Copy());
         }
 
         public bool Expired() {
-            return Environment.TickCount > RemoveTick;
+            return Environment.TickCount > DespawnTick;
         }
 
         public Effect Activate() {

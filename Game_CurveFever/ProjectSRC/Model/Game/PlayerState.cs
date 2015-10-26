@@ -13,7 +13,7 @@ using Game_CurveFever.ProjectSRC.Model.Game.Items;
 
 namespace Game_CurveFever.ProjectSRC.Model.Game {
     public class PlayerState {
-        public const int PLAYER_CHANGE_DIRECTION_SPEED = 30; //Every X milliseconds player can change direction // Higher = bigger turn radius
+        public const int PLAYER_CHANGE_DIRECTION_SPEED = 40; //Every X milliseconds player can change direction // Higher = bigger turn radius // TODO: Calculate turn speed base on player speed
 
         public Player Owner { get; private set; }
         public HitPoint Position { get; private set; }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Game_CurveFever.ProjectSRC.Controller;
 using Game_CurveFever.ProjectSRC.Controller.Game;
+using Game_CurveFever.ProjectSRC.Controller.GUI;
 using Game_CurveFever.ProjectSRC.GUI;
 using Game_CurveFever.ProjectSRC.Model.Game;
 
@@ -19,6 +20,12 @@ namespace Game_CurveFever {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            int guiW = 1500;
+            int guiH = 900;
+            Rectangle screenSize = Screen.PrimaryScreen.Bounds;
+            if (screenSize.Width < guiW) guiW = screenSize.Width - 10;
+            if (screenSize.Height < guiH) guiH = screenSize.Height - 50;
+
             List<Player> players = new List<Player>();
             players.Add(new Player("Test1", 'a', 'd'));
             players.Add(new Player("Test2", 'q', 'e'));
@@ -31,9 +38,10 @@ namespace Game_CurveFever {
             players.Add(new Player("Test9", 'q', 'e'));
             GameOptions.PlayerStartPositions start = GameOptions.PlayerStartPositions.Random;
 
-            FinalizePlayer(start, players);
-            GameOptions options = new GameOptions(true, 75, GameOptions.Host.Server, 5, GameOptions.AllowedPause.Everyone, start, true, null);
-            MainLoop mainL = new MainLoop(options, players);
+            FinalizePlayer(guiW, guiH, start, players);
+            GameOptions options = new GameOptions(true, 100, GameOptions.Host.Server, 5, GameOptions.AllowedPause.Everyone, start, true, null);
+            MainLoop mainL = new MainLoop(guiW, guiH, options, players);
+
             //GUIMain view = new GUIMain();
             //GUIController controller = new GUIController(view); //Controller is saved in view as reference
             //view.RegisterController(controller);
@@ -41,10 +49,7 @@ namespace Game_CurveFever {
             Application.Run(mainL.Panel);
         }
 
-        private static void FinalizePlayer(GameOptions.PlayerStartPositions start, List<Player> players) {
-            int guiWidth = MainPanel.GAME_SCOREBOARD_X;
-            int guiHeight = MainPanel.GAME_HEIGHT;
-
+        private static void FinalizePlayer(int guiWidth, int guiHeight, GameOptions.PlayerStartPositions start, List<Player> players) {
             for(int i = 0; i < players.Count; i++) {
                 Player curPlayer = players[i];
                 switch(start) {
