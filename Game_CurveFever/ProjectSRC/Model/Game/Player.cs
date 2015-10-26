@@ -12,11 +12,13 @@ using System.Drawing;
 
 namespace Game_CurveFever.ProjectSRC.Model.Game {
     public class Player {
-        public Color[] PlayerColors = { Color.Red, Color.Blue, Color.Green, Color.Yellow, Color.Cyan, Color.DarkMagenta, Color.Lime, Color.Orange };
+        public Color[] PlayerColors = { Color.Red, Color.Blue, Color.Green, Color.Yellow, Color.Cyan, Color.DarkMagenta, Color.Lime, 
+                                        Color.Orange, Color.DarkCyan, Color.FloralWhite, Color.SteelBlue, Color.Fuchsia };
 
         public String Name { get; private set; }
         public char StearRight { get; private set; }
         public char StearLeft { get; private set; }
+        public int Score { get; private set; }
 
         public int ID { get; private set; }
         public Color Color { get; private set; }
@@ -35,6 +37,10 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
             ID = id;
             Color = PlayerColors[id];
             PlayerState.SetStart(startPos, startDirection);
+        }
+
+        public void AddPoint() {
+            Score++;
         }
 
         public override string ToString() {

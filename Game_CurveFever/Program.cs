@@ -22,10 +22,17 @@ namespace Game_CurveFever {
             List<Player> players = new List<Player>();
             players.Add(new Player("Test1", 'a', 'd'));
             players.Add(new Player("Test2", 'q', 'e'));
+            players.Add(new Player("Test3", 'q', 'e'));
+            players.Add(new Player("Test4", 'q', 'e'));
+            players.Add(new Player("Test5", 'q', 'e'));
+            players.Add(new Player("Test6", 'q', 'e'));
+            players.Add(new Player("Test7", 'q', 'e'));
+            players.Add(new Player("Test8", 'q', 'e'));
+            players.Add(new Player("Test9", 'q', 'e'));
             GameOptions.PlayerStartPositions start = GameOptions.PlayerStartPositions.Random;
 
             FinalizePlayer(start, players);
-            GameOptions options = new GameOptions(true, 50, GameOptions.Host.Server, 5, GameOptions.AllowedPause.Everyone, start, true, null);
+            GameOptions options = new GameOptions(true, 75, GameOptions.Host.Server, 5, GameOptions.AllowedPause.Everyone, start, true, null);
             MainLoop mainL = new MainLoop(options, players);
             //GUIMain view = new GUIMain();
             //GUIController controller = new GUIController(view); //Controller is saved in view as reference
@@ -35,9 +42,8 @@ namespace Game_CurveFever {
         }
 
         private static void FinalizePlayer(GameOptions.PlayerStartPositions start, List<Player> players) {
-            int guiWidth = MainPanel.GAME_START_WIDTH;
-            int guiHeight = MainPanel.GAME_START_HEIGHT;
-
+            int guiWidth = MainPanel.GAME_SCOREBOARD_X;
+            int guiHeight = MainPanel.GAME_HEIGHT;
 
             for(int i = 0; i < players.Count; i++) {
                 Player curPlayer = players[i];
@@ -59,19 +65,21 @@ namespace Game_CurveFever {
                         HitPoint newHitPoint = null;
                         while(newHitPoint == null) {
                             newHitPoint = HitPoint.CreateRandomHitPoint(20, 20, guiWidth-20, guiHeight-20, curPlayer);
-                            Debug.WriteLine("Trying to create new random start position for player: "+curPlayer);
+                            Debug.WriteLine("Trying to create new random start position for player: \""+curPlayer+"\"");
                             for(int j = 0; j < i; j++) {
                                 Player checkPlayer = players[j];
                                 double distance = newHitPoint.Distance(checkPlayer.PlayerState.Position);
                                 if(distance < 20) {
                                     newHitPoint = null;
-                                    Debug.WriteLine("Failed to create new random start position for player: "+curPlayer+"! Distance to "+checkPlayer+" was "+distance);
+                                    Debug.WriteLine("Failed to create new random start position for player: \"" + curPlayer + "\"!");
+                                    Debug.WriteLine("Distance ("+distance+") to \""+checkPlayer+"\"");
                                     break;
                                 }
                             }
                         }
-                        players[i].Finalize(i, newHitPoint, new Random().Next(360));
+                        players[i].Finalize(i, newHitPoint, MainLoop.Random.Next(360));
                         Debug.WriteLine("Finalized player "+curPlayer);
+                        Debug.WriteLine("");
                         break;
                 }
             }
