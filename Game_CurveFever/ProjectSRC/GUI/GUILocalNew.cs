@@ -111,8 +111,8 @@ namespace Game_CurveFever.ProjectSRC.GUI {
         }
 
         private void FinalizePlayer(GameOptions.PlayerStartPositions start) {
-            int guiWidth = MainPanel.GAME_START_WIDTH;
-            int guiHeight = MainPanel.GAME_START_HEIGHT;
+            int guiWidth = MainPanel.GAME_WIDTH;
+            int guiHeight = MainPanel.GAME_HEIGHT;
 
             for(int i = 0; i < _players.Count; i++) {
                 Player curPlayer = _players[i];

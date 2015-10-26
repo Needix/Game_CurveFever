@@ -9,11 +9,14 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using Game_CurveFever.ProjectSRC.Controller.Game;
 using Game_CurveFever.Properties;
 
 namespace Game_CurveFever.ProjectSRC.Model.Game.Items {
     public class Item {
-        public const int TICK_AMOUNT_ITEM_ON_FIELD = 20000;
+        public const int MAX_TICK_AMOUNT_ITEM_ON_FIELD = 20000;
+        public const int IMAGE_HITBOX_SIZE = 10;
+
         public static List<Item> PossibleItems { get; private set; }
         public static void CreateItems() {
             if (PossibleItems != null) throw new InvalidOperationException("Items were already initialized!");
@@ -34,23 +37,24 @@ namespace Game_CurveFever.ProjectSRC.Model.Game.Items {
         }
 
         public Image Image { get; private set; }
-        public int PosX { get; private set; }
-        public int PosY { get; private set; }
+        public int X { get; private set; }
+        public int Y { get; private set; }
         public bool ShowCaseItem { get; private set; }
 
         public int AppearedTick { get; private set; }
         public int RemoveTick { get; private set; }
+        public bool Collected { get; set; }
 
         public Effect Effect { get; private set; }
 
         //Used for real items
-        public Item(Image image, int posX, int posY, Effect effect) {
-            PosX = posX;
-            PosY = posY;
+        public Item(Image image, int x, int y, Effect effect) {
+            X = x;
+            Y = y;
             Image = image;
             Effect = effect;
             AppearedTick = Environment.TickCount;
-            RemoveTick = Environment.TickCount + TICK_AMOUNT_ITEM_ON_FIELD;
+            RemoveTick = Environment.TickCount + MAX_TICK_AMOUNT_ITEM_ON_FIELD;
             ShowCaseItem = false;
         }
 
@@ -61,8 +65,21 @@ namespace Game_CurveFever.ProjectSRC.Model.Game.Items {
             ShowCaseItem = true;
         }
 
+        public static Item CreateRandomItem() {
+            Item selectedItem = PossibleItems[MainLoop.Random.Next(PossibleItems.Count)];
+            return new Item(selectedItem.Image, MainLoop.Random.Next(MainPanel.GAME_SCOREBOARD_X), MainLoop.Random.Next(MainPanel.GAME_HEIGHT), selectedItem.Effect.Copy());
+        }
+
+        public bool Expired() {
+            return Environment.TickCount > RemoveTick;
+        }
+
         public Effect Activate() {
             return Effect.Copy();
+        }
+
+        public override string ToString() {
+            return string.Format("({0}/{1}): {2}", X, Y, Effect);
         }
     }
 }

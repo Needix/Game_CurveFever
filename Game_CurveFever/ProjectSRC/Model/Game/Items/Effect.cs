@@ -39,5 +39,9 @@ namespace Game_CurveFever.ProjectSRC.Model.Game.Items {
         public Effect Copy() {
             return new Effect(Duration, Power, Environment.TickCount, EffectedPlayers, Name);
         }
+
+        public override string ToString() {
+            return string.Format("{0}: EffectedPlayers: {1}, Power: {2}, TickStarted: {3}, Duration: {4}", Name, EffectedPlayers, Power, TickStarted, Duration);
+        }
     }
 }

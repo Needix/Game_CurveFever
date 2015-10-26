@@ -6,6 +6,7 @@
 //     Mail:     mailto:needdragon@gmail.com 
 //     Twitter: https://twitter.com/NeedDragon
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -15,13 +16,21 @@ using Game_CurveFever.ProjectSRC.Model.Game.Items;
 
 namespace Game_CurveFever.ProjectSRC.Controller.Game {
     public class MainLoop {
+        private static Random _random;
+        public static Random Random {
+            get {
+                if(_random == null) _random = new Random();
+                return _random;
+            }
+            set { _random = value; }
+        }
+
         public enum GameStates {
             Running = 0,
             Paused = 1,
             Won = 2,
         }
 
-        private readonly Thread _mainLoopThread;
         private readonly MainPanel _panel; 
         public MainPanel Panel { get; private set; } //TODO: Remove on release
         private readonly GameOptions _gameOptions;
@@ -32,6 +41,10 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         public GameStates GameState { get; set; }
         public bool End { get; set; }
         public bool Paused { get; set; }
+
+        private int _lastItemAppearedTick = Environment.TickCount;
+        private readonly int _tickTimeBetweenNewItemSpawns = 7*1000;
+        private readonly double _itemAppearProbability = 0.005;
 
         public Player Winner { get; private set; }
 
@@ -45,21 +58,22 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
 
             Item.CreateItems();
 
-            Application.AddMessageFilter(this._keyMessageFilter);
+            Application.AddMessageFilter(_keyMessageFilter);
 
             _panel = new MainPanel(this);
             _panel.Visible = true;
 
-            _mainLoopThread = new Thread(Run);
-            _mainLoopThread.Name = "MainGameLoop";
-            _mainLoopThread.Start();
+            var mainLoopThread = new Thread(Run);
+            mainLoopThread.Name = "MainGameLoop";
+            mainLoopThread.Start();
         }
 
         private void Run() {
-            while (!End) {
+            while(!End) {
+                if(_gameOptions.PlayerSpeed < 100) Thread.Sleep(100 - (_gameOptions.PlayerSpeed)); //TEST: Max speed / Min speed
+                if(_panel == null) continue;
                 CalcNextRound();
                 _panel.Repaint();
-                if(_gameOptions.PlayerSpeed!=0) Thread.Sleep(100-(_gameOptions.PlayerSpeed)); //TEST: Max speed / Min speed
             }
             Application.Exit();
         }
@@ -67,36 +81,87 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         private void CalcNextRound() {
             if(GameState!=GameStates.Running) return;
 
-            Player possibleWinner = null;
-            int alivePlayers = 0;
-            foreach(Player player in Players) {
+            CreateNewFieldItems();
+
+            CalculatePlayerLogic();
+
+            RemoveExpiredItems();
+
+            CheckWinner();
+        }
+
+        private void CalculatePlayerLogic() {
+            foreach (Player player in Players) {
                 if (player.PlayerState.Died) continue;
 
                 CheckPlayerChangeDirection(player);
+                CheckPlayerHitItem(player);
 
                 PlayerState state = player.PlayerState;
                 state.RemoveExpiredEffects();
 
-                int pointSize = 3;
+                int pointSize = HitPoint.DEFAULT_SIZE;
                 HitPoint nextMove = state.CalculateNextMove(player, pointSize);
                 if (CheckPlayerHitWall(player, nextMove)) continue;
                 if (CheckPlayerHitPlayer(player, nextMove)) continue;
 
                 player.PlayerState.AddHitPoint(nextMove);
+            }
+        }
+
+        private void CreateNewFieldItems() {
+            if (Environment.TickCount - _lastItemAppearedTick > _tickTimeBetweenNewItemSpawns &&
+                Random.NextDouble() < _itemAppearProbability) {
+                Item newItem = Item.CreateRandomItem();
+                FieldItems.Add(newItem);
+                _lastItemAppearedTick = Environment.TickCount;
+                Debug.WriteLine("Created new item: "+newItem);
+            }
+        }
+
+        private void CheckWinner() {
+            int alivePlayers = 0;
+            Player possibleWinner = null;
+            foreach (Player player in Players) {
+                if(player.PlayerState.Died) continue;
                 alivePlayers++;
                 possibleWinner = player;
+                if (alivePlayers > 1) break;
             }
-
             if (alivePlayers <= 1) {
                 GameState = GameStates.Won;
                 Winner = possibleWinner;
-                Debug.WriteLine("Winner: "+Winner);
+                Debug.WriteLine("Winner: " + Winner);
+            }
+        }
+
+        private void RemoveExpiredItems() {
+            List<Item> newItems = new List<Item>();
+            foreach (Item fieldItem in FieldItems) {
+                if (fieldItem.Collected || fieldItem.Expired()) {
+                    Debug.WriteLine("Removing collected or expired item: " + fieldItem);
+                    continue;
+                }
+                newItems.Add(fieldItem);
+            }
+            FieldItems = newItems;
+        }
+
+        private void CheckPlayerHitItem(Player player) {
+            foreach (Item fieldItem in FieldItems) {
+                if (player.PlayerState.Position.Hit(fieldItem)) {
+                    player.PlayerState.Effects.Add(fieldItem.Effect);
+                    fieldItem.Collected = true;
+                    Debug.WriteLine(player.Name+" collected item: "+fieldItem.Effect);
+                }
             }
         }
 
         private void CheckPlayerChangeDirection(Player p) {
+            if (Environment.TickCount - p.PlayerState.LastMoveTick <= PlayerState.PLAYER_CHANGE_DIRECTION_SPEED) return;
             if(_keyMessageFilter.IsKeyPressed((p.StearLeft+"").ToUpper())) p.PlayerState.Direction -= 10;
             if(_keyMessageFilter.IsKeyPressed((p.StearRight+"").ToUpper())) p.PlayerState.Direction += 10;
+            p.PlayerState.LastMoveTick = Environment.TickCount;
         }
 
         private bool CheckPlayerHitPlayer(Player player, HitPoint nextMove) {
@@ -110,7 +175,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
                     }
                 }
                 if (hit) {
-                    Debug.WriteLine(player.Name + " died! (PlayerHit " + colCheckPlayer.Name + " @Positions: " + player.PlayerState.Position + "  ///  " + colCheckPlayer.PlayerState.Position + ")");
+                    Debug.WriteLine(player.Name + " died! (PlayerHit " + colCheckPlayer.Name + " @ Positions: " + player.PlayerState.Position + "  ///  " + colCheckPlayer.PlayerState.Position + ")");
                     player.PlayerState.Died = true;
                     return true;
                 }
@@ -119,9 +184,9 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         }
 
         private bool CheckPlayerHitWall(Player player, HitPoint nextMove) {
-            if (nextMove.HitWall(this._panel.Width, this._panel.Height)) {
+            if(nextMove.HitWall(MainPanel.GAME_SCOREBOARD_X, MainPanel.GAME_HEIGHT)) {
                 player.PlayerState.Died = true;
-                Debug.WriteLine(player.Name +" died! (WallHit @"+nextMove+")");
+                Debug.WriteLine(player.Name +" died! (WallHit @ "+nextMove+")");
                 return true;
             }
             return false;

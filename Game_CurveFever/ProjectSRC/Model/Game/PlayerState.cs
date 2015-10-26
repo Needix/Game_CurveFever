@@ -13,12 +13,15 @@ using Game_CurveFever.ProjectSRC.Model.Game.Items;
 
 namespace Game_CurveFever.ProjectSRC.Model.Game {
     public class PlayerState {
+        public const int PLAYER_CHANGE_DIRECTION_SPEED = 30; //Every X milliseconds player can change direction // Higher = bigger turn radius
+
         public Player Owner { get; private set; }
         public HitPoint Position { get; private set; }
         public int Direction { get; set; } //0 is right, 90 is up, 180 is left, 270 is down
         public List<HitPoint> HitBox { get; private set; }
         public List<Effect> Effects { get; private set; }
         public bool Died { get; set; }
+        public int LastMoveTick { get; set; }
 
         public PlayerState(Player owner) {
             Owner = owner;

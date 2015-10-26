@@ -51,7 +51,6 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ProjectSRC\Controller\GUIController.cs" />
-    <Compile Include="ProjectSRC\Controller\Serializer.cs" />
     <Compile Include="ProjectSRC\GUI\GUIInternetCreate.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -88,7 +87,6 @@
     <Compile Include="ProjectSRC\Model\Game\Items\Item.cs" />
     <Compile Include="ProjectSRC\Model\Game\Player.cs" />
     <Compile Include="ProjectSRC\Model\Game\PlayerState.cs" />
-    <Compile Include="ProjectSRC\Model\GUIModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="ProjectSRC\GUI\GUIInternetCreate.resx">
       <DependentUpon>GUIInternetCreate.cs</DependentUpon>
