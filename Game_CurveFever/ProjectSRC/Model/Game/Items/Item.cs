@@ -16,25 +16,24 @@ using Game_CurveFever.Properties;
 namespace Game_CurveFever.ProjectSRC.Model.Game.Items {
     public class Item {
         public const int MAX_TICK_TIME_ON_FIELD = 20 * 1000;
-        public const int IMAGE_HITBOX_SIZE = 25;
+        public const int IMAGE_HITBOX_SIZE = 50;
 
         public static List<Item> PossibleItems { get; private set; }
         public static void CreateItems() {
-            if (PossibleItems != null) throw new InvalidOperationException("Items were already initialized!");
             PossibleItems = new List<Item>();
-            PossibleItems.Add(new Item(Resources.green_slow, new Effect(15, 1, Effect.EffectedPlayer.Other, "Other:Slow")));
-            PossibleItems.Add(new Item(Resources.red_slow, new Effect(15, 1, Effect.EffectedPlayer.Self, "Self:Slow")));
-            PossibleItems.Add(new Item(Resources.green_speed, new Effect(15, 1, Effect.EffectedPlayer.Self, "Self:Speed")));
-            PossibleItems.Add(new Item(Resources.red_speed, new Effect(15, 1, Effect.EffectedPlayer.Other, "Other:Speed")));
+            PossibleItems.Add(new Item(Resources.red_x, new Effect(15, 1, Effect.EffectedPlayer.Self, "Self:NoControl")));
+            PossibleItems.Add(new Item(Resources.red_reverse, new Effect(15, 1, Effect.EffectedPlayer.Self, "Self:ReverseControl")));
             PossibleItems.Add(new Item(Resources.green_sharp, new Effect(15, 1, Effect.EffectedPlayer.Other, "Other:Square")));
             PossibleItems.Add(new Item(Resources.red_sharp, new Effect(15, 1, Effect.EffectedPlayer.Self, "Self:Square")));
-            PossibleItems.Add(new Item(Resources.red_fat, new Effect(15, 1, Effect.EffectedPlayer.Self, "Self:Big")));
-            PossibleItems.Add(new Item(Resources.green_thin, new Effect(15, 1, Effect.EffectedPlayer.Self, "Other:Thin")));
-            PossibleItems.Add(new Item(Resources.red_x, new Effect(15, 1, Effect.EffectedPlayer.Self, "Self:No control")));
-            PossibleItems.Add(new Item(Resources.red_reverse, new Effect(15, 1, Effect.EffectedPlayer.Self, "Self:Reversed Controls")));
+            PossibleItems.Add(new Item(Resources.red_fat, new Effect(15, 6, Effect.EffectedPlayer.Self, "Self:Big")));
+            PossibleItems.Add(new Item(Resources.green_thin, new Effect(15, 3, Effect.EffectedPlayer.Self, "Self:Thin")));
+            PossibleItems.Add(new Item(Resources.green_slow, new Effect(15, 2, Effect.EffectedPlayer.Other, "Other:Slow")));
+            PossibleItems.Add(new Item(Resources.red_slow, new Effect(15, 2, Effect.EffectedPlayer.Self, "Self:Slow")));
+            PossibleItems.Add(new Item(Resources.green_speed, new Effect(15, 2, Effect.EffectedPlayer.Self, "Self:Speed")));
+            PossibleItems.Add(new Item(Resources.red_speed, new Effect(15, 2, Effect.EffectedPlayer.Other, "Other:Speed")));
             PossibleItems.Add(new Item(Resources.blue_eraser, new Effect(15, 1, Effect.EffectedPlayer.Global, "Global:Eraser")));
-            PossibleItems.Add(new Item(Resources.blue_darkness, new Effect(15, 1, Effect.EffectedPlayer.Global, "Global:Darkness")));
-            PossibleItems.Add(new Item(Resources.blue_colorchange, new Effect(15, 1, Effect.EffectedPlayer.Global, "Global:ColorChange")));
+            PossibleItems.Add(new Item(Resources.blue_darkness, new Effect(6, 1, Effect.EffectedPlayer.Global, "Global:Darkness")));
+            PossibleItems.Add(new Item(Resources.blue_colorchange, new Effect(300, 1, Effect.EffectedPlayer.Global, "Global:ColorChange")));
         }
 
         public Image Image { get; private set; }
@@ -81,6 +80,13 @@ namespace Game_CurveFever.ProjectSRC.Model.Game.Items {
 
         public override string ToString() {
             return string.Format("({0}/{1}): {2}", X, Y, Effect);
+        }
+
+        public static bool ItemActive(String name, List<Player> players) {
+            foreach(Player player in players) {
+                if(player.PlayerState.CheckAmountActiveEffects(name) > 0) return true;
+            }
+            return false;
         }
     }
 }

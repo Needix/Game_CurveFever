@@ -73,21 +73,20 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         private void Run() {
             while(GameState!=GameStates.End) {
                 int sleep = _gameOptions.PlayerSpeed + LastRunSpeed;
-                Debug.WriteLine("Sleep: "+sleep);
                 if (sleep < 100) Thread.Sleep(100 - sleep); //TEST: Max speed / Min speed
 
                 if(_panel == null) continue;
 
                 int lastTick = Environment.TickCount;
                 CalcNextRound();
-                Debug.WriteLine("CalcMilliseconds: "+(Environment.TickCount-lastTick));
+                //Debug.WriteLine("CalcMilliseconds: "+(Environment.TickCount-lastTick));
                 LastRunSpeed = (Environment.TickCount - lastTick);
 
                 lastTick = Environment.TickCount;
                 _panel.Repaint();
-                Debug.WriteLine("DrawMilliseconds: " + (Environment.TickCount - lastTick));
+                //Debug.WriteLine("DrawMilliseconds: " + (Environment.TickCount - lastTick));
                 LastRunSpeed += (Environment.TickCount - lastTick);
-                Debug.WriteLine("");
+                //Debug.WriteLine("");
             }
             //TODO: Send network message on exit (or just use timeouts)
             Application.Exit();
@@ -100,33 +99,82 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
 
             CalculatePlayerLogic();
 
-            RemoveExpiredItems();
-
             CheckWinner();
         }
 
+        /// <summary>
+        /// Calculates all the player logic
+        /// </summary>
         private void CalculatePlayerLogic() {
+            ActivatePlayerStateEffects();
+
+            if (Item.ItemActive("Global:Eraser", Players)) {
+                RemoveEffect("Global:Eraser");
+                foreach (Player player in Players) {
+                    player.PlayerState.HitBox.Clear();
+                }
+            }
+
             foreach (Player player in Players) {
-                if (player.PlayerState.Died) continue;
+                for (int i = 0; i < player.PlayerState.CurrentSpeed; i++) { //Add multiple HitPoints at same time to speed up game
+                    if (player.PlayerState.Died) continue;
 
-                CheckPlayerChangeDirection(player);
-                CheckPlayerHitItem(player);
+                    CheckPlayerChangeDirection(player);
+                    CheckPlayerHitItem(player);
 
-                PlayerState state = player.PlayerState;
-                state.RemoveExpiredEffects();
+                    PlayerState state = player.PlayerState;
+                    state.RemoveExpiredEffects();
 
-                int pointSize = HitPoint.DEFAULT_SIZE;
-                HitPoint nextMove = state.CalculateNextMove(player, pointSize);
-                if (CheckPlayerHitWall(player, nextMove)) continue;
-                if (CheckPlayerHitPlayer(player, nextMove)) continue;
+                    HitPoint nextMove = state.CalculateNextMove(player);
+                    //if (CheckPlayerHitWall(player, nextMove)) continue;
+                    //if (CheckPlayerHitPlayer(player, nextMove)) continue;
 
-                player.PlayerState.AddHitPoint(nextMove);
+                    player.PlayerState.AddHitPoint(nextMove);
+
+                    RemoveExpiredItems();
+                }
+            }
+        }
+        /// <summary>
+        /// Activates effects that are saved in PlayerState (like big/thin, speed/slow, square/turn-speed ...)
+        /// </summary>
+        private void ActivatePlayerStateEffects() {
+            foreach (Player player in Players) {
+                player.PlayerState.CurrentSize = HitPoint.DEFAULT_SIZE;
+                player.PlayerState.CurrentSize += 6 * player.PlayerState.CheckAmountActiveEffects("Self:Big");
+                player.PlayerState.CurrentSize -= 3 * player.PlayerState.CheckAmountActiveEffects("Self:Thin");
+
+                player.PlayerState.CurrentTurnRadius = PlayerState.PLAYER_TURN_RADIUS;
+                if (player.PlayerState.CheckAmountActiveEffects("Self:Square") > 0) player.PlayerState.CurrentTurnRadius = 90;
+
+                player.PlayerState.NoControl = false;
+                if (player.PlayerState.CheckAmountActiveEffects("Self:NoControl") > 0) player.PlayerState.NoControl = true;
+
+                player.PlayerState.ReverseControl = false;
+                if(player.PlayerState.CheckAmountActiveEffects("Self:ReverseControl") > 0) player.PlayerState.ReverseControl = true;
+
+                player.PlayerState.CurrentSpeed = 4;
+                player.PlayerState.CurrentSpeed += 2*player.PlayerState.CheckAmountActiveEffects("Self:Speed");
+                player.PlayerState.CurrentSpeed -= 2*player.PlayerState.CheckAmountActiveEffects("Self:Slow");
+
+                foreach (Player player1 in Players) {
+                    //Add/Subtract "Other" effects from other players
+                    if(player == player1) continue;
+                    if(player1.PlayerState.CheckAmountActiveEffects("Other:Square") > 0) player.PlayerState.CurrentTurnRadius = 90;
+                    if(player1.PlayerState.CheckAmountActiveEffects("Other:NoControl") > 0) player.PlayerState.NoControl = true;
+                    if(player1.PlayerState.CheckAmountActiveEffects("Other:ReverseControl") > 0) player.PlayerState.ReverseControl = true;
+
+                    player.PlayerState.CurrentSpeed += 2*player1.PlayerState.CheckAmountActiveEffects("Other:Speed");
+                    player.PlayerState.CurrentSpeed -= 2*player1.PlayerState.CheckAmountActiveEffects("Other:Slow");
+                }
             }
         }
 
+        /// <summary>
+        /// Randomly creates new field items
+        /// </summary>
         private void CreateNewFieldItems() {
-            if (Environment.TickCount - _lastItemSpawnTick > _tickTimeBetweenNewItemSpawns &&
-                Random.NextDouble() < _itemSpawnProbability) {
+            if (Environment.TickCount - _lastItemSpawnTick > _tickTimeBetweenNewItemSpawns && Random.NextDouble() < _itemSpawnProbability) {
                 Item newItem = Item.CreateRandomItem();
                 FieldItems.Add(newItem);
                 _lastItemSpawnTick = Environment.TickCount;
@@ -134,6 +182,9 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
             }
         }
 
+        /// <summary>
+        /// Checks if there is only one player 
+        /// </summary>
         private void CheckWinner() {
             int alivePlayers = 0;
             Player possibleWinner = null;
@@ -146,10 +197,16 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
             if (alivePlayers <= 1) {
                 GameState = GameStates.Won;
                 Winner = possibleWinner;
-                Debug.WriteLine("Winner: " + Winner);
+                if(Winner == null)
+                    Debug.WriteLine("Draw!");
+                else
+                    Debug.WriteLine("Winner: " + Winner);
             }
         }
 
+        /// <summary>
+        /// Removes all expired/collected effects from field items
+        /// </summary>
         private void RemoveExpiredItems() {
             List<Item> newItems = new List<Item>();
             foreach (Item fieldItem in FieldItems) {
@@ -161,24 +218,51 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
             }
             FieldItems = newItems;
         }
-
-        private void CheckPlayerHitItem(Player player) {
-            foreach (Item fieldItem in FieldItems) {
-                if (player.PlayerState.Position.Hit(fieldItem)) {
-                    player.PlayerState.Effects.Add(fieldItem.Effect);
-                    fieldItem.Collected = true;
-                    Debug.WriteLine(player.Name+" collected item: "+fieldItem.Effect);
-                }
+        /// <summary>
+        /// Removed the specific effect from all players
+        /// </summary>
+        /// <param name="name">The effect name to remove</param>
+        public void RemoveEffect(String name) {
+            foreach(Player player in Players) {
+                player.PlayerState.RemoveEffect(name);
             }
         }
 
+        /// <summary>
+        /// Changes the direction of the player
+        /// </summary>
+        /// <param name="p">The player that wants to change their direction</param>
         private void CheckPlayerChangeDirection(Player p) {
-            if (Environment.TickCount - p.PlayerState.LastMoveTick <= PlayerState.PLAYER_CHANGE_DIRECTION_SPEED) return;
-            if(_keyMessageFilter.IsKeyPressed((p.StearLeft+"").ToUpper())) p.PlayerState.Direction -= 10;
-            if(_keyMessageFilter.IsKeyPressed((p.StearRight+"").ToUpper())) p.PlayerState.Direction += 10;
+            if(p.PlayerState.CurrentTurnRadius == PlayerState.PLAYER_TURN_RADIUS && Environment.TickCount - p.PlayerState.LastMoveTick <= PlayerState.PLAYER_TURN_SPEED_NORMAL) return;
+            if(p.PlayerState.CurrentTurnRadius != PlayerState.PLAYER_TURN_RADIUS && Environment.TickCount - p.PlayerState.LastMoveTick <= PlayerState.PLAYER_TURN_SPEED_SQUARE) return;
+            if (p.PlayerState.NoControl) return;
+
+            int turnRadius = p.PlayerState.CurrentTurnRadius;
+            if(p.PlayerState.ReverseControl) turnRadius *= -1;
+            if(_keyMessageFilter.IsKeyPressed((p.StearLeft + "").ToUpper())) p.PlayerState.Direction -= turnRadius;
+            if(_keyMessageFilter.IsKeyPressed((p.StearRight + "").ToUpper())) p.PlayerState.Direction += turnRadius;
             p.PlayerState.LastMoveTick = Environment.TickCount;
         }
 
+        /// <summary>
+        /// Checks if the player hits an field item
+        /// </summary>
+        /// <param name="player">The player to check</param>
+        private void CheckPlayerHitItem(Player player) {
+            foreach(Item fieldItem in FieldItems) {
+                if(player.PlayerState.Position.Hit(fieldItem)) {
+                    player.PlayerState.ActiveEffects.Add(fieldItem.Activate());
+                    fieldItem.Collected = true;
+                    Debug.WriteLine(player.Name + " collected item: " + fieldItem.Effect);
+                }
+            }
+        }
+        /// <summary>
+        /// Checks if the next move of the player collides with another player
+        /// </summary>
+        /// <param name="player">The player to check</param>
+        /// <param name="nextMove">The next move of this player</param>
+        /// <returns>true, if the player will collide with another player, else false</returns>
         private bool CheckPlayerHitPlayer(Player player, HitPoint nextMove) {
             bool hit = false;
             foreach (Player colCheckPlayer in Players) {
@@ -197,7 +281,12 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
             }
             return false;
         }
-
+        /// <summary>
+        /// Checks if the player will hit a wall in the next move
+        /// </summary>
+        /// <param name="player">The player to check</param>
+        /// <param name="nextMove">The next move of the player</param>
+        /// <returns>true, if the player hits a wall in the next move, else false</returns>
         private bool CheckPlayerHitWall(Player player, HitPoint nextMove) {
             if(nextMove.HitWall(MainPanel.GameScoreboardX, MainPanel.GameHeight)) {
                 player.PlayerState.Died = true;
@@ -207,6 +296,9 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
             return false;
         }
 
+        /// <summary>
+        /// Requests the end the game and sets the GameState to end
+        /// </summary>
         public void Exit() {
             GameState = GameStates.End;
         }

@@ -42,42 +42,35 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
         }
 
         public bool Hit(Item e) {
-            float minX1 = X - Size / 2f;
-            float minY1 = Y - Size / 2f;
-            float maxX1 = X + Size / 2f;
-            float maxY1 = Y + Size / 2f;
-
-            float minX2 = e.X - Item.IMAGE_HITBOX_SIZE;
-            float minY2 = e.Y - Item.IMAGE_HITBOX_SIZE;
+            float minX2 = e.X;
+            float minY2 = e.Y;
             float maxX2 = e.X + Item.IMAGE_HITBOX_SIZE;
             float maxY2 = e.Y + Item.IMAGE_HITBOX_SIZE;
 
-            return Hit(minX1, minY1, maxX1, maxY1, minX2, minY2, maxX2, maxY2);
+            return Hit(minX2, minY2, maxX2, maxY2);
         }
         public bool Hit(HitPoint other) {
-            float minX1 = X - Size / 2f;
-            float minY1 = Y - Size / 2f;
-            float maxX1 = X + Size / 2f;
-            float maxY1 = Y + Size / 2f;
-
             float minX2 = other.X - other.Size / 2f;
             float minY2 = other.Y - other.Size / 2f;
             float maxX2 = other.X + other.Size / 2f;
             float maxY2 = other.Y + other.Size / 2f;
 
-            return Hit(minX1, minY1, maxX1, maxY1, minX2, minY2, maxX2, maxY2);
+            return Hit(minX2, minY2, maxX2, maxY2);
         }
-        public bool Hit(float minX1, float minY1, float maxX1, float maxY1, float minX2, float minY2, float maxX2, float maxY2) {
-            bool xHit = false;
-            bool yHit = false;
+        public bool Hit(float minX2, float minY2, float maxX2, float maxY2) {
+            float minX1 = X - Size / 2f;
+            float minY1 = Y - Size / 2f;
+            float maxX1 = X + Size / 2f;
+            float maxY1 = Y + Size / 2f;
 
-            if((minX2 > minX1 && minX2 < maxX1) ||
-                 (maxX2 > minX1 && maxX2 < maxX1)) {
-                xHit = true;
+            bool xHit = true;
+            bool yHit = true;
+
+            if ((minX1 < minX2 && maxX1 < minX2) || (minX1 > maxX2 && maxX1 > maxX2)) {
+                xHit = false;
             }
-            if((minY2 > minY1 && minY2 < maxY1) ||
-                 (maxY2 > minY1 && maxY2 < maxY1)) {
-                yHit = true;
+            if((minY1 < minY2 && maxY1 < minY2) || (minY1 > maxY2 && maxY1 > maxY2)) {
+                yHit = false;
             }
 
             return xHit && yHit;

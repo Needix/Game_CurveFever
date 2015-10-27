@@ -24,22 +24,16 @@ namespace Game_CurveFever {
             int guiH = 900;
             Rectangle screenSize = Screen.PrimaryScreen.Bounds;
             if (screenSize.Width < guiW) guiW = screenSize.Width - 10;
-            if (screenSize.Height < guiH) guiH = screenSize.Height - 50;
+            if(screenSize.Height < guiH) guiH = screenSize.Height - 50;
+            int gameScoreboardX = guiW - guiH / 5;
 
             List<Player> players = new List<Player>();
             players.Add(new Player("Test1", 'a', 'd'));
             players.Add(new Player("Test2", 'q', 'e'));
-            players.Add(new Player("Test3", 'q', 'e'));
-            players.Add(new Player("Test4", 'q', 'e'));
-            players.Add(new Player("Test5", 'q', 'e'));
-            players.Add(new Player("Test6", 'q', 'e'));
-            players.Add(new Player("Test7", 'q', 'e'));
-            players.Add(new Player("Test8", 'q', 'e'));
-            players.Add(new Player("Test9", 'q', 'e'));
             GameOptions.PlayerStartPositions start = GameOptions.PlayerStartPositions.Random;
 
-            FinalizePlayer(guiW, guiH, start, players);
-            GameOptions options = new GameOptions(true, 100, GameOptions.Host.Server, 5, GameOptions.AllowedPause.Everyone, start, true, null);
+            FinalizePlayer(gameScoreboardX, guiH, start, players);
+            GameOptions options = new GameOptions(true, 40, GameOptions.Host.Server, 5, GameOptions.AllowedPause.Everyone, start, true, null);
             MainLoop mainL = new MainLoop(guiW, guiH, options, players);
 
             //GUIMain view = new GUIMain();

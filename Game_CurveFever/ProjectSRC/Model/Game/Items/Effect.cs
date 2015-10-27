@@ -33,7 +33,7 @@ namespace Game_CurveFever.ProjectSRC.Model.Game.Items {
         }
 
         public Boolean CheckExpired() {
-            return TickStarted + Duration > Environment.TickCount;
+            return TickStarted + Duration * 1000 < Environment.TickCount;
         }
 
         public Effect Copy() {
