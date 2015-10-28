@@ -66,22 +66,28 @@ namespace Game_CurveFever.ProjectSRC.Controller.GUI {
                 g.Clear(Color.Black);   
             }
 
+            if(_mainLoop.GameState == MainLoop.GameStates.ShowStart) {
+                //TODO: Draw "StartDirection Arrows"
+            }
+
+            //Score
             if(_mainLoop.GameState == MainLoop.GameStates.Score) {
                 Font f = new Font("Arial", 30);
                 String drawString = "Draw!";
-                if(_mainLoop.Winner != null)
-                    drawString = _mainLoop.Winner.Name + " (Color \"" + _mainLoop.Winner.Color.Name + "\") scored!";
+                if(_mainLoop.Winner != null) drawString = _mainLoop.Winner.Name + " (Color \"" + _mainLoop.Winner.Color.Name + "\") scored!";
+
+                SizeF stringSize = g.MeasureString(drawString, f);
+                g.DrawString(drawString, f, new SolidBrush(Color.White), GameWidth / 2f - stringSize.Width / 2, GameHeight / 2f - stringSize.Height / 2); 
             }
 
             //Draw won player
             if (_mainLoop.GameState == MainLoop.GameStates.Won) {
                 Font f = new Font("Arial", 30);
                 String drawString = "Draw!";
-                if (_mainLoop.Winner != null)
-                    drawString = _mainLoop.Winner.Name + " (Color \"" + _mainLoop.Winner.Color.Name + "\") won!";
+                if (_mainLoop.Winner != null) drawString = _mainLoop.Winner.Name + " (Color \"" + _mainLoop.Winner.Color.Name + "\") won!";
 
                 SizeF stringSize = g.MeasureString(drawString, f);
-                g.DrawString(drawString, f, new SolidBrush(Color.White), GameWidth/2f-stringSize.Width/2, GameHeight/2f-stringSize.Height/2); //TODO: Draw text in middle of screen
+                g.DrawString(drawString, f, new SolidBrush(Color.White), GameWidth/2f-stringSize.Width/2, GameHeight/2f-stringSize.Height/2);
             }
 
             //Draw Items
@@ -91,11 +97,11 @@ namespace Game_CurveFever.ProjectSRC.Controller.GUI {
 
             //Draw Players
             bool darknessActive = Item.ItemActive("Global:Darkness", players);
-            foreach (Player player in players) {
-                if(darknessActive) { //TODO: Add "flickering"
-                    HitPoint last = player.PlayerState.Position;
-                    g.FillEllipse(new SolidBrush(last.Color), last.X, last.Y, last.Size, last.Size);
-                } else {
+            foreach(Player player in players) {
+                HitPoint last = player.PlayerState.Position;
+                if(last!=null) g.FillEllipse(new SolidBrush(last.Color), last.X, last.Y, last.Size, last.Size);
+
+                if(!darknessActive) { //TODO: Add "flickering" // FogOfWar
                     List<HitPoint> points = player.PlayerState.HitBox;
                     foreach(HitPoint point in points) {
                         Brush b = new SolidBrush(point.Color);
@@ -117,7 +123,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.GUI {
 
             //Draw paused
             if(_mainLoop.GameState == MainLoop.GameStates.Paused) {
-                g.DrawString("Game paused!", new Font("Arial", 30), new SolidBrush(Color.White), this.Width/2-50, this.Height/2f); //TODO: Draw text in middle of screen
+                g.DrawString("Game paused!", new Font("Arial", 30), new SolidBrush(Color.White), this.Width/2-50, this.Height/2f);
             }
         }
 

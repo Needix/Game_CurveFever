@@ -39,7 +39,7 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
         }
 
         public void SetStart(HitPoint startPosition, int startDirection) {
-            if(Position!=null) throw new InvalidOperationException("Start position was already set!");
+            if(Position!=null) throw new InvalidOperationException("Init position was already set!");
             Position = startPosition;
             Direction = startDirection;
         }

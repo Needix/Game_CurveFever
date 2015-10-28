@@ -180,7 +180,7 @@
             this.b_startLocalGame.Name = "b_startLocalGame";
             this.b_startLocalGame.Size = new System.Drawing.Size(339, 36);
             this.b_startLocalGame.TabIndex = 12;
-            this.b_startLocalGame.Text = "Start local game";
+            this.b_startLocalGame.Text = "Init local game";
             this.b_startLocalGame.UseVisualStyleBackColor = true;
             // 
             // label6

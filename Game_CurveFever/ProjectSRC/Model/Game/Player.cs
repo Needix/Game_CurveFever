@@ -33,10 +33,11 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
             PlayerState = new PlayerState(this);
         }
 
-        public void Finalize(int id, HitPoint startPos, int startDirection) {
+        public void ResetPlayer(int id, StartPosition sp) {
             ID = id;
             Color = PlayerColors[id];
-            PlayerState.SetStart(startPos, startDirection);
+            PlayerState = new PlayerState(this);
+            PlayerState.SetStart(sp.StartPos, sp.StartDirection);
         }
 
         public void AddScore() {

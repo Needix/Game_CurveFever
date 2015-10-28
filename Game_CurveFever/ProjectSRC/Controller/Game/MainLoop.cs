@@ -27,19 +27,21 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         }
 
         public enum GameStates {
-            Start = 0,
-            Running = 1,
-            Paused = 2,
-            Score = 3,
-            Won = 4,
-            End = 5,
+            Init = 0,
+            ShowStart = 1,
+            Running = 2,
+            Paused = 3,
+            Score = 4,
+            Won = 5,
+            End = 6,
         }
 
         public const int PAUSE_BETWEEN_SCORES = 7*1000;
         public const int PAUSE_BETWEEN_START_RUNNING = 4*1000;
 
+        public const int TICK_SELF_IMMUNITY = 500;
+
         private readonly MainPanel _panel; 
-        public MainPanel Panel { get; private set; } //TODO: Remove on release
         private readonly GameOptions _gameOptions;
 
         public List<Player> Players { get; private set; }
@@ -52,7 +54,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         private readonly double _itemSpawnProbability = 0.005;
 
         public int TickPlayerScored { get; set; }
-        public int TickStart { get; set; }
+        public int TickGameStateToStartChanged { get; set; }
 
         public Player Winner { get; private set; }
 
@@ -64,7 +66,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
             _gameOptions = gameOptions;
             Players = players;
             FieldItems = new List<Item>();
-            GameState = GameStates.Running;
+            GameState = GameStates.Init;
 
             Item.CreateItems();
 
@@ -76,6 +78,8 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
             var mainLoopThread = new Thread(Run);
             mainLoopThread.Name = "MainGameLoop";
             mainLoopThread.Start();
+
+            Application.Run(_panel);
         }
 
         private void Run() {
@@ -95,9 +99,20 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
 
         private void CalcNextRound() {
             if(GameState == GameStates.Score && Environment.TickCount - TickPlayerScored > PAUSE_BETWEEN_SCORES) {
-                TickStart = Environment.TickCount;
-                GameState = GameStates.Start;
-            } 
+                TickGameStateToStartChanged = Environment.TickCount;
+                GameState = GameStates.Init;
+            }
+            if(GameState == GameStates.Init) {
+                GameState = GameStates.ShowStart;
+
+                List<StartPosition> pStartPos = CreateStartPositions(Players);
+                for(int i = 0; i < Players.Count; i++) {
+                    Players[i].ResetPlayer(i, pStartPos[i]);
+                }
+            }
+            if(GameState == GameStates.ShowStart && Environment.TickCount - TickGameStateToStartChanged > PAUSE_BETWEEN_START_RUNNING) {
+                GameState = GameStates.Running;
+            }
             if(GameState!=GameStates.Running) return;
 
             CreateNewFieldItems();
@@ -168,17 +183,14 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
             if (alivePlayers <= 1) {
                 Winner = possibleWinner;
 
-                if(Winner == null) {
-                    Debug.WriteLine("Draw!");
-                    return;
-                }
-                Debug.WriteLine("Winner: " + Winner);
-
-                Winner.AddScore();
                 GameState = GameStates.Score;
                 TickPlayerScored = Environment.TickCount;
-                if(Winner.Score == _gameOptions.NeededWins) {
-                    GameState = GameStates.Won;
+
+                if(Winner != null) {
+                    Winner.AddScore();
+                    if(Winner.Score == _gameOptions.NeededWins) {
+                        GameState = GameStates.Won;
+                    }
                 }
             }
         }
@@ -281,9 +293,11 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
             foreach (Player colCheckPlayer in Players) {
                 PlayerState colPlayerState = colCheckPlayer.PlayerState;
                 foreach (HitPoint colCheckHitpoint in colPlayerState.HitBox) {
-                    if (colCheckPlayer != player && nextMove.Hit(colCheckHitpoint)) {
-                        hit = true;
-                        break;
+                    if(nextMove.Hit(colCheckHitpoint)) {
+                        if(colCheckPlayer != player || (colCheckPlayer == player && Environment.TickCount - colCheckHitpoint.Created > TICK_SELF_IMMUNITY)) {
+                            hit = true;
+                            break;
+                        }
                     }
                 }
                 if (hit) {
@@ -309,7 +323,49 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
             return false;
         }
 
-        public void CreatePlayer(List<String> name, List<char> stearLeft, List<char> stearRight)
+        public List<StartPosition> CreateStartPositions(List<Player> player) {
+            int guiWidth = MainPanel.GameScoreboardX;
+            int guiHeight = MainPanel.GameHeight;
+            List<StartPosition> starts = new List<StartPosition>();
+
+            for(int i = 0; i < player.Count; i++) {
+                Player curPlayer = player[i];
+                switch(_gameOptions.PlayerStartPosition) {
+                    case GameOptions.PlayerStartPositions.Circle:
+                        //TODO: Calculate coords based on player count (e.g. 3 player: every 360/3 = 120 degree one player // 4 player: every 360/4 = 90 degree one player)
+                        double angleBetweenPlayers = 360d / player.Count;
+                        break;
+
+                    case GameOptions.PlayerStartPositions.Line:
+                        float xDistanceBetweenPlayers = (guiWidth - 40) / (float)player.Count;
+                        int randomY = new Random().Next(20, guiHeight - 20);
+                        starts.Add(new StartPosition(new HitPoint(20 + i * xDistanceBetweenPlayers, randomY, curPlayer), new Random().Next(360)));
+                        break;
+
+                    case GameOptions.PlayerStartPositions.Random:
+                        HitPoint newHitPoint = null;
+                        while(newHitPoint == null) {
+                            newHitPoint = HitPoint.CreateRandomHitPoint(20, 20, guiWidth - 20, guiHeight - 20, curPlayer);
+                            Debug.WriteLine("Trying to create new random start position for player: \"" + curPlayer + "\"");
+                            for(int j = 0; j < i; j++) {
+                                StartPosition sp = starts[j];
+                                double distance = newHitPoint.Distance(sp.StartPos);
+                                if(distance < 20) {
+                                    newHitPoint = null;
+                                    Debug.WriteLine("Failed to create new random start position for player: \"" + curPlayer + "\"!");
+                                    Debug.WriteLine("Distance (" + distance + ") to \"" + sp + "\"");
+                                    break;
+                                }
+                            }
+                        }
+                        starts.Add(new StartPosition(newHitPoint, Random.Next(360)));
+                        Debug.WriteLine("Finalized player " + curPlayer);
+                        Debug.WriteLine("");
+                        break;
+                }
+            }
+            return starts;
+        }
 
         /// <summary>
         /// Requests the end the game and sets the GameState to end

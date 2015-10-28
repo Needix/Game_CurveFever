@@ -22,6 +22,7 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
         public Color Color { get; set; }
         public int Size { get; set; }
         public Player Owner { get; set; }
+        public int Created { get; set; }
 
         public HitPoint(float x, float y, Player owner) : this(x, y, DEFAULT_SIZE, owner) { }
         public HitPoint(float x, float y, int size, Player owner) : this(x, y, size, owner, owner.Color) { }
@@ -31,6 +32,7 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
             Size = size;
             Owner = owner;
             Color = color;
+            Created = Environment.TickCount;
         }
 
         public double Distance(HitPoint other) {

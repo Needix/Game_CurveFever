@@ -109,54 +109,12 @@ namespace Game_CurveFever.ProjectSRC.GUI {
             if (screenSize.Width < guiW) guiW = screenSize.Width;
             if (screenSize.Height < guiH) guiH = screenSize.Height;
 
-            FinalizePlayer(startPos);
+            //FinalizePlayer(startPos);
 
             GameOptions options = new GameOptions(items, playerSpeed, GameOptions.Host.Server, neededWins, pause, startPos, photoFinish, null);
             MainLoop main = new MainLoop(guiW, guiH, options, _players);
             this.Visible = false;
             
-        }
-
-        private void FinalizePlayer(GameOptions.PlayerStartPositions start) {
-            int guiWidth = MainPanel.GameWidth;
-            int guiHeight = MainPanel.GameHeight;
-
-            for(int i = 0; i < _players.Count; i++) {
-                Player curPlayer = _players[i];
-                switch(start) {
-                    case GameOptions.PlayerStartPositions.Circle:
-                        //TODO: Calculate coords based on player count (e.g. 3 player: every 360/3 = 120 degree one player // 4 player: every 360/4 = 90 degree one player)
-                        double angleBetweenPlayers = 360d/_players.Count;
-                        break;
-
-                    case GameOptions.PlayerStartPositions.Line:
-                        float xDistanceBetweenPlayers = (guiWidth - 40)/(float)_players.Count;
-                        int randomY = new Random().Next(20, guiHeight-20);
-                        _players[i].Finalize(i, 
-                            new HitPoint(20+i*xDistanceBetweenPlayers, randomY, curPlayer), 
-                            new Random().Next(360));
-                        break;
-
-                    case GameOptions.PlayerStartPositions.Random:
-                        HitPoint newHitPoint = null;
-                        while (newHitPoint == null) {
-                            newHitPoint = HitPoint.CreateRandomHitPoint(20, 20, guiWidth-20, guiHeight-20, curPlayer);
-                            Debug.WriteLine("Trying to create new random start position for player: "+curPlayer);
-                            for (int j = 0; j < i; j++) {
-                                Player checkPlayer = _players[j];
-                                double distance = newHitPoint.Distance(checkPlayer.PlayerState.Position);
-                                if (distance < 20) {
-                                    newHitPoint = null;
-                                    Debug.WriteLine("Failed to create new random start position for player: "+curPlayer+"! Distance to "+checkPlayer+" was "+distance);
-                                    break;
-                                }
-                            }
-                        }
-                        _players[i].Finalize(i, newHitPoint, new Random().Next(360));
-                        Debug.WriteLine("Finalized player "+curPlayer);
-                        break;
-                }
-            }
         }
 
         private void OnClosing(object sender, EventArgs e) {

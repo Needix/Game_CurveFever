@@ -87,6 +87,7 @@
     <Compile Include="ProjectSRC\Model\Game\Items\Item.cs" />
     <Compile Include="ProjectSRC\Model\Game\Player.cs" />
     <Compile Include="ProjectSRC\Model\Game\PlayerState.cs" />
+    <Compile Include="ProjectSRC\Model\Game\StartPosition.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="ProjectSRC\GUI\GUIInternetCreate.resx">
       <DependentUpon>GUIInternetCreate.cs</DependentUpon>

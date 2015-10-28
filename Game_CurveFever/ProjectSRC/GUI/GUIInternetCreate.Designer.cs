@@ -172,7 +172,7 @@
             this.b_startServer.Name = "b_startServer";
             this.b_startServer.Size = new System.Drawing.Size(572, 23);
             this.b_startServer.TabIndex = 5;
-            this.b_startServer.Text = "Start";
+            this.b_startServer.Text = "Init";
             this.b_startServer.UseVisualStyleBackColor = true;
             // 
             // splitContainer2
