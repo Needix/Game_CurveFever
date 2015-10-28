@@ -27,11 +27,16 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         }
 
         public enum GameStates {
-            Running = 0,
-            Paused = 1,
-            Won = 2,
-            End = 3,
+            Start = 0,
+            Running = 1,
+            Paused = 2,
+            Score = 3,
+            Won = 4,
+            End = 5,
         }
+
+        public const int PAUSE_BETWEEN_SCORES = 7*1000;
+        public const int PAUSE_BETWEEN_START_RUNNING = 4*1000;
 
         private readonly MainPanel _panel; 
         public MainPanel Panel { get; private set; } //TODO: Remove on release
@@ -45,6 +50,9 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         private int _lastItemSpawnTick = Environment.TickCount;
         private readonly int _tickTimeBetweenNewItemSpawns = 7*1000;
         private readonly double _itemSpawnProbability = 0.005;
+
+        public int TickPlayerScored { get; set; }
+        public int TickStart { get; set; }
 
         public Player Winner { get; private set; }
 
@@ -73,26 +81,23 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         private void Run() {
             while(GameState!=GameStates.End) {
                 int sleep = _gameOptions.PlayerSpeed + LastRunSpeed;
-                if (sleep < 100) Thread.Sleep(100 - sleep); //TEST: Max speed / Min speed
+                if (sleep < 100) Thread.Sleep(100 - sleep);
 
                 if(_panel == null) continue;
 
-                int lastTick = Environment.TickCount;
                 CalcNextRound();
-                //Debug.WriteLine("CalcMilliseconds: "+(Environment.TickCount-lastTick));
-                LastRunSpeed = (Environment.TickCount - lastTick);
 
-                lastTick = Environment.TickCount;
                 _panel.Repaint();
-                //Debug.WriteLine("DrawMilliseconds: " + (Environment.TickCount - lastTick));
-                LastRunSpeed += (Environment.TickCount - lastTick);
-                //Debug.WriteLine("");
             }
             //TODO: Send network message on exit (or just use timeouts)
             Application.Exit();
         }
 
         private void CalcNextRound() {
+            if(GameState == GameStates.Score && Environment.TickCount - TickPlayerScored > PAUSE_BETWEEN_SCORES) {
+                TickStart = Environment.TickCount;
+                GameState = GameStates.Start;
+            } 
             if(GameState!=GameStates.Running) return;
 
             CreateNewFieldItems();
@@ -106,7 +111,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         /// Calculates all the player logic
         /// </summary>
         private void CalculatePlayerLogic() {
-            ActivatePlayerStateEffects();
+            ActivatePlayerEffects();
 
             if (Item.ItemActive("Global:Eraser", Players)) {
                 RemoveEffect("Global:Eraser");
@@ -126,46 +131,12 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
                     state.RemoveExpiredEffects();
 
                     HitPoint nextMove = state.CalculateNextMove(player);
-                    //if (CheckPlayerHitWall(player, nextMove)) continue;
-                    //if (CheckPlayerHitPlayer(player, nextMove)) continue;
+                    if (CheckPlayerHitWall(player, nextMove)) continue;
+                    if (CheckPlayerHitPlayer(player, nextMove)) continue;
 
                     player.PlayerState.AddHitPoint(nextMove);
 
                     RemoveExpiredItems();
-                }
-            }
-        }
-        /// <summary>
-        /// Activates effects that are saved in PlayerState (like big/thin, speed/slow, square/turn-speed ...)
-        /// </summary>
-        private void ActivatePlayerStateEffects() {
-            foreach (Player player in Players) {
-                player.PlayerState.CurrentSize = HitPoint.DEFAULT_SIZE;
-                player.PlayerState.CurrentSize += 6 * player.PlayerState.CheckAmountActiveEffects("Self:Big");
-                player.PlayerState.CurrentSize -= 3 * player.PlayerState.CheckAmountActiveEffects("Self:Thin");
-
-                player.PlayerState.CurrentTurnRadius = PlayerState.PLAYER_TURN_RADIUS;
-                if (player.PlayerState.CheckAmountActiveEffects("Self:Square") > 0) player.PlayerState.CurrentTurnRadius = 90;
-
-                player.PlayerState.NoControl = false;
-                if (player.PlayerState.CheckAmountActiveEffects("Self:NoControl") > 0) player.PlayerState.NoControl = true;
-
-                player.PlayerState.ReverseControl = false;
-                if(player.PlayerState.CheckAmountActiveEffects("Self:ReverseControl") > 0) player.PlayerState.ReverseControl = true;
-
-                player.PlayerState.CurrentSpeed = 4;
-                player.PlayerState.CurrentSpeed += 2*player.PlayerState.CheckAmountActiveEffects("Self:Speed");
-                player.PlayerState.CurrentSpeed -= 2*player.PlayerState.CheckAmountActiveEffects("Self:Slow");
-
-                foreach (Player player1 in Players) {
-                    //Add/Subtract "Other" effects from other players
-                    if(player == player1) continue;
-                    if(player1.PlayerState.CheckAmountActiveEffects("Other:Square") > 0) player.PlayerState.CurrentTurnRadius = 90;
-                    if(player1.PlayerState.CheckAmountActiveEffects("Other:NoControl") > 0) player.PlayerState.NoControl = true;
-                    if(player1.PlayerState.CheckAmountActiveEffects("Other:ReverseControl") > 0) player.PlayerState.ReverseControl = true;
-
-                    player.PlayerState.CurrentSpeed += 2*player1.PlayerState.CheckAmountActiveEffects("Other:Speed");
-                    player.PlayerState.CurrentSpeed -= 2*player1.PlayerState.CheckAmountActiveEffects("Other:Slow");
                 }
             }
         }
@@ -195,15 +166,57 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
                 if (alivePlayers > 1) break;
             }
             if (alivePlayers <= 1) {
-                GameState = GameStates.Won;
                 Winner = possibleWinner;
-                if(Winner == null)
+
+                if(Winner == null) {
                     Debug.WriteLine("Draw!");
-                else
-                    Debug.WriteLine("Winner: " + Winner);
+                    return;
+                }
+                Debug.WriteLine("Winner: " + Winner);
+
+                Winner.AddScore();
+                GameState = GameStates.Score;
+                TickPlayerScored = Environment.TickCount;
+                if(Winner.Score == _gameOptions.NeededWins) {
+                    GameState = GameStates.Won;
+                }
             }
         }
 
+        /// <summary>
+        /// Activates effects that are saved in PlayerState (like big/thin, speed/slow, square/turn-speed ...)
+        /// </summary>
+        private void ActivatePlayerEffects() {
+            foreach(Player player in Players) {
+                player.PlayerState.CurrentSize = HitPoint.DEFAULT_SIZE;
+                player.PlayerState.CurrentSize += 6 * player.PlayerState.CheckAmountActiveEffects("Self:Big");
+                player.PlayerState.CurrentSize -= 3 * player.PlayerState.CheckAmountActiveEffects("Self:Thin");
+
+                player.PlayerState.CurrentTurnRadius = PlayerState.PLAYER_TURN_RADIUS;
+                if(player.PlayerState.CheckAmountActiveEffects("Self:Square") > 0) player.PlayerState.CurrentTurnRadius = 90;
+
+                player.PlayerState.NoControl = false;
+                if(player.PlayerState.CheckAmountActiveEffects("Self:NoControl") > 0) player.PlayerState.NoControl = true;
+
+                player.PlayerState.ReverseControl = false;
+                if(player.PlayerState.CheckAmountActiveEffects("Self:ReverseControl") > 0) player.PlayerState.ReverseControl = true;
+
+                player.PlayerState.CurrentSpeed = 4;
+                player.PlayerState.CurrentSpeed += 2 * player.PlayerState.CheckAmountActiveEffects("Self:Speed");
+                player.PlayerState.CurrentSpeed -= 2 * player.PlayerState.CheckAmountActiveEffects("Self:Slow");
+
+                foreach(Player player1 in Players) {
+                    //Add/Subtract "Other" effects from other players
+                    if(player == player1) continue;
+                    if(player1.PlayerState.CheckAmountActiveEffects("Other:Square") > 0) player.PlayerState.CurrentTurnRadius = 90;
+                    if(player1.PlayerState.CheckAmountActiveEffects("Other:NoControl") > 0) player.PlayerState.NoControl = true;
+                    if(player1.PlayerState.CheckAmountActiveEffects("Other:ReverseControl") > 0) player.PlayerState.ReverseControl = true;
+
+                    player.PlayerState.CurrentSpeed += 2 * player1.PlayerState.CheckAmountActiveEffects("Other:Speed");
+                    player.PlayerState.CurrentSpeed -= 2 * player1.PlayerState.CheckAmountActiveEffects("Other:Slow");
+                }
+            }
+        }
         /// <summary>
         /// Removes all expired/collected effects from field items
         /// </summary>
@@ -295,6 +308,8 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
             }
             return false;
         }
+
+        public void CreatePlayer(List<String> name, List<char> stearLeft, List<char> stearRight)
 
         /// <summary>
         /// Requests the end the game and sets the GameState to end

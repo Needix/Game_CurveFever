@@ -66,18 +66,22 @@ namespace Game_CurveFever.ProjectSRC.Controller.GUI {
                 g.Clear(Color.Black);   
             }
 
+            if(_mainLoop.GameState == MainLoop.GameStates.Score) {
+                Font f = new Font("Arial", 30);
+                String drawString = "Draw!";
+                if(_mainLoop.Winner != null)
+                    drawString = _mainLoop.Winner.Name + " (Color \"" + _mainLoop.Winner.Color.Name + "\") scored!";
+            }
+
             //Draw won player
             if (_mainLoop.GameState == MainLoop.GameStates.Won) {
                 Font f = new Font("Arial", 30);
-                String drawString;
+                String drawString = "Draw!";
                 if (_mainLoop.Winner != null)
                     drawString = _mainLoop.Winner.Name + " (Color \"" + _mainLoop.Winner.Color.Name + "\") won!";
-                else
-                    drawString = "Draw!";
 
                 SizeF stringSize = g.MeasureString(drawString, f);
                 g.DrawString(drawString, f, new SolidBrush(Color.White), GameWidth/2f-stringSize.Width/2, GameHeight/2f-stringSize.Height/2); //TODO: Draw text in middle of screen
-                return;
             }
 
             //Draw Items

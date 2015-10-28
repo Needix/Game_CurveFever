@@ -39,7 +39,7 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
             PlayerState.SetStart(startPos, startDirection);
         }
 
-        public void AddPoint() {
+        public void AddScore() {
             Score++;
         }
 
