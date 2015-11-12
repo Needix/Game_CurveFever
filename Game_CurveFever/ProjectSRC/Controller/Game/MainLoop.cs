@@ -136,7 +136,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
             }
 
             foreach (Player player in Players) {
-                for (int i = 0; i < player.PlayerState.CurrentSpeed; i++) { //Add multiple HitPoints at same time to speed up game
+                for (int i = 0; i < 5; i++) { //Add multiple HitPoints at same time to speed up game
                     if (player.PlayerState.Died) continue;
 
                     CheckPlayerChangeDirection(player);
@@ -213,7 +213,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
                 player.PlayerState.ReverseControl = false;
                 if(player.PlayerState.CheckAmountActiveEffects("Self:ReverseControl") > 0) player.PlayerState.ReverseControl = true;
 
-                player.PlayerState.CurrentSpeed = 4;
+                player.PlayerState.CurrentSpeed = PlayerState.PLAYER_DEFAULT_SPEED;
                 player.PlayerState.CurrentSpeed += 2 * player.PlayerState.CheckAmountActiveEffects("Self:Speed");
                 player.PlayerState.CurrentSpeed -= 2 * player.PlayerState.CheckAmountActiveEffects("Self:Slow");
 
@@ -275,7 +275,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         /// <param name="player">The player to check</param>
         private void CheckPlayerHitItem(Player player) {
             foreach(Item fieldItem in FieldItems) {
-                if(player.PlayerState.Position.Hit(fieldItem)) {
+                if(player.PlayerState.CurrentHitpoint.Hit(fieldItem)) {
                     player.PlayerState.ActiveEffects.Add(fieldItem.Activate());
                     fieldItem.Collected = true;
                     Debug.WriteLine(player.Name + " collected item: " + fieldItem.Effect);
@@ -301,7 +301,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
                     }
                 }
                 if (hit) {
-                    Debug.WriteLine(player.Name + " died! (PlayerHit " + colCheckPlayer.Name + " @ Positions: " + player.PlayerState.Position + "  ///  " + colCheckPlayer.PlayerState.Position + ")");
+                    Debug.WriteLine(player.Name + " died! (PlayerHit " + colCheckPlayer.Name + " @ Positions: " + player.PlayerState.CurrentHitpoint + "  ///  " + colCheckPlayer.PlayerState.CurrentHitpoint + ")");
                     player.PlayerState.Died = true;
                     return true;
                 }

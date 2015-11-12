@@ -55,7 +55,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.GUI {
             }
         }
 
-        protected override void OnPaint(PaintEventArgs e) {
+        protected override void OnPaint(PaintEventArgs e) { //BUG: Sometimes shows strange "red X"
             base.OnPaint(e);
             List<Player> players = _mainLoop.Players;
             Graphics g = e.Graphics;
@@ -68,6 +68,9 @@ namespace Game_CurveFever.ProjectSRC.Controller.GUI {
 
             if(_mainLoop.GameState == MainLoop.GameStates.ShowStart) {
                 //TODO: Draw "StartDirection Arrows"
+                foreach (Player player in players) {
+                    HitPoint nextMove = player.PlayerState.CalculateNextMove(player);
+                }
             }
 
             //Score
@@ -98,14 +101,14 @@ namespace Game_CurveFever.ProjectSRC.Controller.GUI {
             //Draw Players
             bool darknessActive = Item.ItemActive("Global:Darkness", players);
             foreach(Player player in players) {
-                HitPoint last = player.PlayerState.Position;
-                if(last!=null) g.FillEllipse(new SolidBrush(last.Color), last.X, last.Y, last.Size, last.Size);
+                HitPoint last = player.PlayerState.CurrentHitpoint;
+                if (last != null) g.FillEllipse(new SolidBrush(last.Color), last.Pos.X, last.Pos.Y, last.Size, last.Size);
 
                 if(!darknessActive) { //TODO: Add "flickering" // FogOfWar
                     List<HitPoint> points = player.PlayerState.HitBox;
                     foreach(HitPoint point in points) {
                         Brush b = new SolidBrush(point.Color);
-                        g.FillEllipse(b, point.X, point.Y, point.Size, point.Size);
+                        g.FillEllipse(b, point.Pos.X, point.Pos.Y, point.Size, point.Size);
                     }   
                 }
             }
