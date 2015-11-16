@@ -18,6 +18,9 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
         public const int PLAYER_TURN_SPEED_SQUARE = 150; //Every X mulliseconds player can change direction // Used if player is under effect of SQUARE effect
         public const int PLAYER_TURN_RADIUS = 10; //Turn Radius per turn //Lower = bigger turn radius //In degrees
         public const int PLAYER_DEFAULT_SPEED = 1;
+        public const int MAX_HOLE_SIZE_IN_TICKS = 500;
+        public const int MIN_HOLE_SIZE_IN_TICKS = 330;
+        public const double PROBABILITY_DRAW_HOLES_START = 0.0105; //Probability to start a hole each tick
 
         public Player Owner { get; private set; }
         public HitPoint CurrentHitpoint { get; private set; }
@@ -27,6 +30,8 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
         public bool Died { get; set; }
         public int LastMoveTick { get; set; }
 
+        public int DrawHoleStartTick { get; set; }
+        public int DrawHoleStopTick { get; set; }
         public int CurrentSpeed { get; set; }
         public int CurrentSize { get; set; }
         public int CurrentTurnRadius { get; set; }
@@ -40,7 +45,7 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
         }
 
         public void SetStart(HitPoint startPosition, int startDirection) {
-            if(CurrentHitpoint!=null) throw new InvalidOperationException("Init position was already set!");
+            if(CurrentHitpoint!=null) throw new InvalidOperationException("Initial position was already set!");
             CurrentHitpoint = startPosition;
             Direction = startDirection;
         }

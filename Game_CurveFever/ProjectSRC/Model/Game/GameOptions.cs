@@ -30,8 +30,8 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
             Circle = 3,
         }
 
-        //TODO: Add "Holes" as gameoption
-        public Boolean Items { get; private set; }
+        public bool Holes { get; private set; }
+        public bool Items { get; private set; }
         public int PlayerSpeed { get; private set; }
         public int NeededWins { get; private set; }
         public Host HostType { get; private set; }
@@ -40,7 +40,8 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
         public Boolean CreatePhotoFinish { get; private set; }
         public List<Item> AllowedItems { get; private set; }
 
-        public GameOptions(bool items, int playerSpeed, Host hostType, int neededWins, AllowedPause allowedPauseType, PlayerStartPositions playerStartPosition, bool createPhotoFinish, List<Item> allowedItems) {
+        public GameOptions(bool holes, bool items, int playerSpeed, Host hostType, int neededWins, AllowedPause allowedPauseType, PlayerStartPositions playerStartPosition, bool createPhotoFinish, List<Item> allowedItems) {
+            Holes = holes;
             Items = items;
             PlayerSpeed = playerSpeed;
             HostType = hostType;

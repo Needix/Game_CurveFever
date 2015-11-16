@@ -22,6 +22,7 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
         public int Size { get; set; }
         public Player Owner { get; set; }
         public int Created { get; set; }
+        public bool Enabled { get; set; }
 
         public HitPoint(float x, float y, Player owner) : this(x, y, owner, DEFAULT_SIZE) { }
         public HitPoint(float x, float y, Player owner, int size) {
@@ -31,13 +32,11 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
             Owner = owner;
             Color = Owner.Color;
             Created = Environment.TickCount;
+            Enabled = true;
         }
 
         public Position CalcRelativePoint(int direction, int speed) {
-            double radianDirection = Math.PI * direction / 180; //Degree to Radian
-            float nextXDouble = (float)(Pos.X + Math.Cos(radianDirection)*speed);
-            float nextYDouble = (float)(Pos.Y + Math.Sin(radianDirection)*speed);
-            return new Position(nextXDouble, nextYDouble);
+            return Pos.CalcRelativePoint(direction, speed);
         }
 
         public double Distance(HitPoint other) {
@@ -57,6 +56,7 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
             return Hit(minX2, minY2, maxX2, maxY2);
         }
         public bool Hit(HitPoint other) {
+            if(!other.Enabled) return false;
             float minX2 = other.Pos.X - other.Size / 2f;
             float minY2 = other.Pos.Y - other.Size / 2f;
             float maxX2 = other.Pos.X + other.Size / 2f;
@@ -65,6 +65,7 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
             return Hit(minX2, minY2, maxX2, maxY2);
         }
         public bool Hit(float minX2, float minY2, float maxX2, float maxY2) {
+            if(!this.Enabled) return false;
             float minX1 = Pos.X - Size / 2f;
             float minY1 = Pos.Y - Size / 2f;
             float maxX1 = Pos.X + Size / 2f;

@@ -32,7 +32,7 @@ namespace Game_CurveFever {
             players.Add(new Player("Test2", 'q', 'e'));
             
             //FinalizePlayer(gameScoreboardX, guiH, start, players);
-            GameOptions options = new GameOptions(true, 40, GameOptions.Host.Server, 5, GameOptions.AllowedPause.Everyone, GameOptions.PlayerStartPositions.Random, true, null);
+            GameOptions options = new GameOptions(true, true, 40, GameOptions.Host.Server, 5000, GameOptions.AllowedPause.Everyone, GameOptions.PlayerStartPositions.Random, true, null);
             MainLoop mainL = new MainLoop(guiW, guiH, options, players);
 
             //GUIMain view = new GUIMain();

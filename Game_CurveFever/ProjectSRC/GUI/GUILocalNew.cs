@@ -71,6 +71,7 @@ namespace Game_CurveFever.ProjectSRC.GUI {
         }
 
         private void OnKeyPress(object sender, KeyPressEventArgs e) {
+            Debug.WriteLine("DebugPressedKey, GUILocalNew_OnKeyPress; return on space/backspace: "+(int)e.KeyChar);
             if (_keyListenerCheckbox == null) return; //TODO: Return on space/backspace char
             _keyListenerCheckbox.Checked = false;
             _keyListenerCheckbox.Text = (e.KeyChar+"");
@@ -96,6 +97,7 @@ namespace Game_CurveFever.ProjectSRC.GUI {
             bool pauseAllowed = comboBox_options_pauseAllowed.Items[comboBox_options_pauseAllowed.SelectedIndex].Equals("Yes");
             bool photoFinish = comboBox_options_createWinPhoto.Items[comboBox_options_createWinPhoto.SelectedIndex].Equals("Yes");
             String playerStart = (String)comboBox_options_playerStart.Items[comboBox_options_playerStart.SelectedIndex];
+            bool holes = true; //TODO: Add holes in GUI as option
 
             GameOptions.AllowedPause pause = pauseAllowed ? GameOptions.AllowedPause.Everyone : GameOptions.AllowedPause.Nobody;
             GameOptions.PlayerStartPositions startPos;
@@ -111,7 +113,7 @@ namespace Game_CurveFever.ProjectSRC.GUI {
 
             //FinalizePlayer(startPos);
 
-            GameOptions options = new GameOptions(items, playerSpeed, GameOptions.Host.Server, neededWins, pause, startPos, photoFinish, null);
+            GameOptions options = new GameOptions(holes, items, playerSpeed, GameOptions.Host.Server, neededWins, pause, startPos, photoFinish, null);
             MainLoop main = new MainLoop(guiW, guiH, options, _players);
             this.Visible = false;
             

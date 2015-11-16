@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 
 namespace Game_CurveFever.ProjectSRC.Model.Game {
@@ -25,7 +26,7 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
 
         public PlayerState PlayerState { get; private set; }
 
-        public Player(String name, char stearLeft, char stearRight) {
+        public Player(string name, char stearLeft, char stearRight) {
             Name = name;
             StearRight = stearRight;
             StearLeft = stearLeft;
@@ -36,6 +37,7 @@ namespace Game_CurveFever.ProjectSRC.Model.Game {
         public void ResetPlayer(int id, StartPosition sp) {
             ID = id;
             Color = PlayerColors[id];
+            sp.StartPos.Color = Color;
             PlayerState = new PlayerState(this);
             PlayerState.SetStart(sp.StartPos, sp.StartDirection);
         }

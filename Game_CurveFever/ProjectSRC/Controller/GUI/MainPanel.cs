@@ -67,9 +67,34 @@ namespace Game_CurveFever.ProjectSRC.Controller.GUI {
             }
 
             if(_mainLoop.GameState == MainLoop.GameStates.ShowStart) {
-                //TODO: Draw "StartDirection Arrows"
                 foreach (Player player in players) {
-                    HitPoint nextMove = player.PlayerState.CalculateNextMove(player);
+                    Pen p = new Pen(player.Color, 2);
+                    Brush b = new SolidBrush(player.Color);
+
+                    int direction = player.PlayerState.Direction;
+                    Position arrowLineStart = player.PlayerState.CurrentHitpoint.CalcRelativePoint(direction, 15); //Relative location to player
+                    Position arrowLineEnd = arrowLineStart.CalcRelativePoint(direction, 20); //Line Direction + Length
+                    Position arrowHeadFront = arrowLineEnd.CalcRelativePoint(direction, 5); //Front of ArrowHead
+                    Position arrowHeadLeft = arrowHeadFront.CalcRelativePoint(direction - 45, -10); //
+                    Position arrowHeadRight = arrowHeadFront.CalcRelativePoint(direction + 45, -10);
+                    Point[] triangle = new Point[3];
+                    triangle[0] = new Point((int)arrowHeadFront.X, (int)arrowHeadFront.Y);
+                    triangle[1] = new Point((int)arrowHeadLeft.X, (int)arrowHeadLeft.Y);
+                    triangle[2] = new Point((int)arrowHeadRight.X, (int)arrowHeadRight.Y);
+
+                    g.DrawLine(p, arrowLineStart.X, arrowLineStart.Y, arrowLineEnd.X, arrowLineEnd.Y);
+                    g.FillPolygon(b, triangle);
+
+                    string countDownString = "Get ready...";
+                    int timeLeft = Environment.TickCount - _mainLoop.TickGameStateToStartChanged;
+                    if(timeLeft > 4700) countDownString = "GO!";
+                    else if(timeLeft > 3700) countDownString = "1!";
+                    else if(timeLeft > 2700) countDownString = "2!";
+                    else if(timeLeft > 1700) countDownString = "3!";
+
+                    Font f = new Font("Arial", 30);
+                    SizeF stringSize = g.MeasureString(countDownString, f);
+                    g.DrawString(countDownString, f, new SolidBrush(Color.White), GameWidth / 2f - stringSize.Width / 2, GameHeight / 2f - stringSize.Height / 2); 
                 }
             }
 
@@ -102,17 +127,19 @@ namespace Game_CurveFever.ProjectSRC.Controller.GUI {
             bool darknessActive = Item.ItemActive("Global:Darkness", players);
             foreach(Player player in players) {
                 HitPoint last = player.PlayerState.CurrentHitpoint;
-                if (last != null) g.FillEllipse(new SolidBrush(last.Color), last.Pos.X, last.Pos.Y, last.Size, last.Size);
+                if(last != null) {
+                    g.FillEllipse(new SolidBrush(last.Color), last.Pos.X, last.Pos.Y, last.Size, last.Size);
+                }
 
                 if(!darknessActive) { //TODO: Add "flickering" // FogOfWar
                     List<HitPoint> points = player.PlayerState.HitBox;
                     foreach(HitPoint point in points) {
+                        if(!point.Enabled) continue;
                         Brush b = new SolidBrush(point.Color);
                         g.FillEllipse(b, point.Pos.X, point.Pos.Y, point.Size, point.Size);
                     }   
                 }
             }
-            //Debug.WriteLine("Players: " + (Environment.TickCount - tick));
 
             //Draw Scores
             Font scoreFont = new Font("Arial", 15);

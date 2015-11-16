@@ -37,7 +37,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
         }
 
         public const int PAUSE_BETWEEN_SCORES = 7*1000;
-        public const int PAUSE_BETWEEN_START_RUNNING = 4*1000;
+        public const int PAUSE_BETWEEN_START_RUNNING = 5*1000;
 
         public const int TICK_SELF_IMMUNITY = 500;
 
@@ -67,6 +67,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
             Players = players;
             FieldItems = new List<Item>();
             GameState = GameStates.Init;
+            TickGameStateToStartChanged = Environment.TickCount;
 
             Item.CreateItems();
 
@@ -75,7 +76,7 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
             _panel = new MainPanel(guiW, guiH, this);
             _panel.Visible = true;
 
-            var mainLoopThread = new Thread(Run);
+            Thread mainLoopThread = new Thread(Run);
             mainLoopThread.Name = "MainGameLoop";
             mainLoopThread.Start();
 
@@ -103,12 +104,12 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
                 GameState = GameStates.Init;
             }
             if(GameState == GameStates.Init) {
-                GameState = GameStates.ShowStart;
-
                 List<StartPosition> pStartPos = CreateStartPositions(Players);
                 for(int i = 0; i < Players.Count; i++) {
                     Players[i].ResetPlayer(i, pStartPos[i]);
                 }
+
+                GameState = GameStates.ShowStart;
             }
             if(GameState == GameStates.ShowStart && Environment.TickCount - TickGameStateToStartChanged > PAUSE_BETWEEN_START_RUNNING) {
                 GameState = GameStates.Running;
@@ -142,18 +143,33 @@ namespace Game_CurveFever.ProjectSRC.Controller.Game {
                     CheckPlayerChangeDirection(player);
                     CheckPlayerHitItem(player);
 
-                    PlayerState state = player.PlayerState;
-                    state.RemoveExpiredEffects();
+                    player.PlayerState.RemoveExpiredEffects();
 
-                    HitPoint nextMove = state.CalculateNextMove(player);
+                    HitPoint nextMove = player.PlayerState.CalculateNextMove(player);
                     if (CheckPlayerHitWall(player, nextMove)) continue;
                     if (CheckPlayerHitPlayer(player, nextMove)) continue;
 
-                    player.PlayerState.AddHitPoint(nextMove);
+                    CalculateHoleChance(player, nextMove);
 
                     RemoveExpiredItems();
                 }
             }
+        }
+
+        private void CalculateHoleChance(Player player, HitPoint nextMove) {
+            PlayerState state = player.PlayerState;
+            if(_gameOptions.Holes && (state.DrawHoleStartTick != 0 || Random.NextDouble() < PlayerState.PROBABILITY_DRAW_HOLES_START)) {
+                if(state.DrawHoleStartTick == 0) {
+                    state.DrawHoleStartTick = Environment.TickCount;
+                    state.DrawHoleStopTick = Environment.TickCount +
+                                             Random.Next(PlayerState.MIN_HOLE_SIZE_IN_TICKS, PlayerState.MAX_HOLE_SIZE_IN_TICKS);
+                } else if(Environment.TickCount > state.DrawHoleStopTick) {
+                    state.DrawHoleStartTick = 0;
+                    state.DrawHoleStopTick = 0;
+                }
+                nextMove.Enabled = false;
+            }
+            player.PlayerState.AddHitPoint(nextMove);
         }
 
         /// <summary>
